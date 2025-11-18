@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap2Send – Dashboard</title>
+
+<style>
+:root {
+    --green: #0c5f44;
+    --gold: #d4af37;
+    --blue: #285AE8;
+    --white: #ffffff;
+    --dark: #0a0a0a;
+    --glass: rgba(255,255,255,0.08);
+}
+
+/* BACKGROUND */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(140deg, rgba(12,95,68,0.9), rgba(10,10,10,0.85)),
+                url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=70');
+    background-size: cover;
+    background-position: center;
+    color: var(--white);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    background: rgba(255,255,255,0.06);
+    border-right: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    padding: 25px 20px;
+}
+
+.logo {
+    color: var(--gold);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.menu a {
+    display: block;
+    padding: 14px 15px;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 15px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: 0.3s ease;
+}
+
+.menu a:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.active {
+    background: var(--gold);
+    color: var(--dark) !important;
+    font-weight: 600;
+}
+
+
+/* MAIN CONTENT */
+.main {
+    flex: 1;
+    padding: 30px;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.welcome {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.logout-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    background: var(--gold);
+    color: var(--dark);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.logout-btn:hover {
+    background: #f5d76e;
+}
+
+/* DASHBOARD BOXES */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.card {
+    background: var(--glass);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 25px;
+    border-radius: 18px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    transition: 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    border-color: var(--gold);
+}
+
+.card h3 {
+    font-size: 20px;
+    color: var(--gold);
+}
+
+.card p {
+    margin-top: 10px;
+    color: #eee;
+    line-height: 22px;
+}
+
+/* MOBILE FIXES */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    .main {
+        padding: 20px;
+    }
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="logo">Tap2Send</div>
+
+    <div class="menu">
+        <a href="dashboard.html" class="active">📊 Dashboard</a>
+        <a href="connect-whatsapp.html">🔗 Connect WhatsApp</a>
+        <a href="campaigns.html">🚀 Campaigns</a>
+        <a href="templates.html">📄 Message Templates</a>
+        <a href="autoresponder.html">🤖 Auto Responder</a>
+        <a href="settings.html">⚙️ Settings</a>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+    <div class="header">
+        <div class="welcome">Welcome, <span id="userEmail">Loading...</span></div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <h2>Smart Automation for WhatsApp</h2>
+    <p>Send Faster. Grow Smarter. Stay Safe with Tap2Send.</p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Messages Sent</h3>
+            <p>Track how many messages you have sent today.</p>
+        </div>
+
+        <div class="card">
+            <h3>Active Campaigns</h3>
+            <p>See all your running WhatsApp campaigns in one place.</p>
+        </div>
+
+        <div class="card">
+            <h3>Auto Responders</h3>
+            <p>Manage your smart auto-replies to handle customers 24/7.</p>
+        </div>
+
+        <div class="card">
+            <h3>Safe Mode Status</h3>
+            <p>Anti-ban protection is active and running.</p>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script>
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain: "tap2send-8e72d.firebaseapp.com",
+  projectId: "tap2send-8e72d",
+  storageBucket: "tap2send-8e72d.firebasestorage.app",
+  messagingSenderId: "572191430506",
+  appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+};
+firebase.initializeApp(firebaseConfig);
+
+// CHECK LOGIN
+firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+        window.location.href = "auth.html";
+    } else {
+        document.getElementById("userEmail").innerText = user.email;
+    }
+});
+
+// LOGOUT
+function logout() {
+    firebase.auth().signOut().then(() => {
+        window.location.href = "auth.html";
+    });
+}
+</script>
+
+</body>
+</html>
