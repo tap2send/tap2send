@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap2Send – Login / Signup</title>
+
+<style>
+:root {
+    --green: #0c5f44;
+    --gold: #d4af37;
+    --blue: #285AE8;
+    --white: #ffffff;
+    --dark: #0b0b0b;
+}
+
+/* page style */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, rgba(12,95,68,0.92), rgba(16,16,16,0.85)),
+                url('https://images.unsplash.com/photo-1551033541-2075d8363c30?auto=format&fit=crop&w=1200&q=80');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+/* box */
+.auth-box {
+    width: 100%;
+    max-width: 380px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+    padding: 30px;
+    border-radius: 18px;
+    color: var(--white);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    animation: fadeIn 1.3s ease;
+}
+
+.logo {
+    font-size: 28px;
+    color: var(--gold);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+h2 {
+    margin: 0 0 15px;
+    text-align: center;
+    font-weight: 700;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    margin: 8px 0 15px;
+    background: rgba(255,255,255,0.15);
+    color: var(--white);
+    font-size: 15px;
+}
+
+input::placeholder {
+    color: #ddd;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: var(--gold);
+    color: var(--dark);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 5px;
+}
+
+button:hover {
+    background: #f5d76e;
+}
+
+.switch-link, .forgot-link {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+a {
+    color: var(--gold);
+    text-decoration: none;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+</style>
+
+</head>
+<body>
+
+<div class="auth-box">
+
+    <div class="logo">Tap2Send</div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-box">
+        <h2>Login</h2>
+
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+
+        <div class="forgot-link">
+            <a href="#" onclick="showForgot()">Forgot Password?</a>
+        </div>
+
+        <div class="switch-link">
+            Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a>
+        </div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signup-box" style="display:none;">
+        <h2>Create Account</h2>
+
+        <input type="email" id="signupEmail" placeholder="Email">
+        <input type="password" id="signupPassword" placeholder="Password">
+
+        <button onclick="signup()">Sign Up</button>
+
+        <div class="switch-link">
+            Already have an account? <a href="#" onclick="showLogin()">Login</a>
+        </div>
+    </div>
+
+    <!-- FORGOT FORM -->
+    <div id="forgot-box" style="display:none;">
+        <h2>Reset Password</h2>
+
+        <input type="email" id="forgotEmail" placeholder="Enter your Email">
+
+        <button onclick="forgotPassword()">Send Reset Link</button>
+
+        <div class="switch-link">
+            Back to <a href="#" onclick="showLogin()">Login</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script>
+// your firebase config (LIVE)
+const firebaseConfig = {
+  apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain: "tap2send-8e72d.firebaseapp.com",
+  projectId: "tap2send-8e72d",
+  storageBucket: "tap2send-8e72d.firebasestorage.app",
+  messagingSenderId: "572191430506",
+  appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// FORM SWITCH
+function showSignup() {
+    document.getElementById("login-box").style.display = "none";
+    document.getElementById("signup-box").style.display = "block";
+    document.getElementById("forgot-box").style.display = "none";
+}
+function showLogin() {
+    document.getElementById("login-box").style.display = "block";
+    document.getElementById("signup-box").style.display = "none";
+    document.getElementById("forgot-box").style.display = "none";
+}
+function showForgot() {
+    document.getElementById("login-box").style.display = "none";
+    document.getElementById("signup-box").style.display = "none";
+    document.getElementById("forgot-box").style.display = "block";
+}
+
+// Firebase Login
+function login() {
+    const email = document.getElementById("loginEmail").value;
+    const pass = document.getElementById("loginPassword").value;
+
+    auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+            alert("Login Successful!");
+            window.location.href = "dashboard.html";
+        })
+        .catch(err => alert(err.message));
+}
+
+// Firebase Signup
+function signup() {
+    const email = document.getElementById("signupEmail").value;
+    const pass = document.getElementById("signupPassword").value;
+
+    auth.createUserWithEmailAndPassword(email, pass)
+        .then(() => {
+            alert("Signup Successful!");
+            window.location.href = "dashboard.html";
+        })
+        .catch(err => alert(err.message));
+}
+
+// Firebase Forgot Password
+function forgotPassword() {
+    const email = document.getElementById("forgotEmail").value;
+
+    auth.sendPasswordResetEmail(email)
+        .then(() => alert("Password reset link sent!"))
+        .catch(err => alert(err.message));
+}
+</script>
+
+</body>
+</html>
