@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap2Send | Contact Us</title>
+<style>
+:root{
+  --madina:#0C7A43;
+  --gold:#D4AF37;
+  --blue:#1E3A8A;
+  --white:#FFFFFF;
+}
+body{margin:0;font-family:sans-serif;background:var(--madina);color:var(--white);}
+header{background:var(--blue);padding:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+header h1{color:var(--gold);margin:0;font-size:1.8em;}
+nav a{text-decoration:none;color:var(--white);font-weight:bold;margin:5px;}
+nav a:hover{color:var(--gold);}
+.container{padding:20px;max-width:800px;margin:auto;}
+.card{background:var(--blue);padding:20px;border-radius:15px;margin:20px 0;box-shadow:0 8px 16px rgba(0,0,0,0.3);transition:transform 0.3s;}
+.card:hover{transform:scale(1.02);}
+input,textarea,button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:none;}
+button{background:var(--gold);color:black;font-weight:bold;cursor:pointer;}
+button:hover{opacity:0.9;}
+@media(max-width:768px){header{flex-direction:column;}nav{margin-top:10px;}}
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script>
+// Firebase config
+const firebaseConfig = {
+  apiKey: "YOUR_FIREBASE_KEY",
+  authDomain: "YOUR_FIREBASE_DOMAIN",
+  projectId: "YOUR_FIREBASE_PROJECT_ID",
+  storageBucket: "YOUR_FIREBASE_BUCKET",
+  messagingSenderId: "YOUR_FIREBASE_SENDER",
+  appId: "YOUR_FIREBASE_APPID"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Logout
+function logout(){auth.signOut().then(()=>window.location.href='index.html');}
+
+// Submit contact message
+function submitMessage(){
+  const subject = document.getElementById('subject').value.trim();
+  const message = document.getElementById('message').value.trim();
+  if(!subject||!message){alert("Enter subject and message"); return;}
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      db.collection('supportMessages').add({
+        uid: user.uid,
+        email: user.email,
+        subject,
+        message,
+        createdAt: new Date()
+      }).then(()=>{
+        alert("Message sent successfully!");
+        document.getElementById('contactForm').reset();
+      }).catch(err=>alert(err.message));
+    } else {
+      window.location.href='auth.html';
+    }
+  });
+}
+</script>
+</head>
+<body>
+
+<header>
+  <h1>Tap2Send Contact</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="auth.html">Login</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2>Contact Support</h2>
+    <form id="contactForm" onsubmit="event.preventDefault(); submitMessage();">
+      <input type="text" id="subject" placeholder="Subject" required>
+      <textarea id="message" placeholder="Your Message" rows="5" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Support Information</h2>
+    <p>Email: support@tap2send.com</p>
+    <p>Phone: +91 9019254743</p>
+  </div>
+</div>
+
+<footer style="background:var(--madina);padding:20px;text-align:center;">
+  <p>&copy; 2025 Tap2Send. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
