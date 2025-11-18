@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tap2Send - Smart WhatsApp Automation</title>
+<meta name="description" content="Tap2Send helps automate WhatsApp messaging with speed, safety, and control." />
+<meta name="keywords" content="Tap2Send, WhatsApp automation, messaging tool, campaigns, autoresponder" />
+<style>
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: #ffffff;
+    overflow-x: hidden;
+  }
+  /* Colors */
+  :root {
+    --green: #0c7a43;
+    --gold: #d4af37;
+    --blue: #1e3a8a;
+    --white: #ffffff;
+  }
+  /* Navbar */
+  nav {
+    width: 100%;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px);
+    z-index: 999;
+  }
+  nav a {
+    text-decoration: none;
+    margin-left: 25px;
+    color: var(--blue);
+    font-weight: 600;
+    transition: 0.3s;
+  }
+  nav a:hover {
+    color: var(--green);
+  }
+  /* Hero Section */
+  .hero {
+    height: 100vh;
+    padding-top: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero h1 {
+    font-size: 48px;
+    max-width: 800px;
+    font-weight: 700;
+  }
+  .hero p {
+    font-size: 18px;
+    max-width: 600px;
+    margin-top: 15px;
+  }
+  /* Floating animated shapes */
+  .float {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    animation: floatAnim 8s infinite ease-in-out;
+  }
+  @keyframes floatAnim {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-40px); }
+    100% { transform: translateY(0px); }
+  }
+  /* CTA Button */
+  .cta {
+    margin-top: 30px;
+    padding: 14px 30px;
+    border-radius: 8px;
+    border: none;
+    background: var(--gold);
+    color: #000;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .cta:hover { background: #f5d76e; }
+  /* Features */
+  .features {
+    padding: 80px 30px;
+    background: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+  }
+  .card {
+    width: 300px;
+    padding: 30px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-left: 5px solid var(--green);
+    transition: 0.3s;
+  }
+  .card:hover {
+    transform: translateY(-10px);
+    border-left: 5px solid var(--gold);
+  }
+</style>
+</head>
+<body><nav>
+  <div style="font-size: 28px; font-weight: 800; color: var(--green);">Tap2Send</div>
+  <div>
+    <a href="index.html">Home</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="auth.html" style="color: var(--gold);">Login</a>
+  </div>
+</nav><section class="hero">
+  <div class="float" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
+  <div class="float" style="bottom: 15%; right: 12%; animation-delay: 2s;"></div>
+  <div class="float" style="top: 40%; right: 25%; animation-delay: 4s;"></div>  <h1>Tap2Send – Your Growth, Your Automation, Your Control.</h1>
+  <p>Automate WhatsApp messaging with powerful campaigns, templates, autoresponders,
+  and secure delivery without bans or limits.</p>
+  <a href="auth.html"><button class="cta">Start Now</button></a>
+</section><section class="features">
+  <div class="card">
+    <h2>🚀 Fast Messaging</h2>
+    <p>Send bulk and targeted messages instantly with high delivery accuracy.</p>
+  </div>
+  <div class="card">
+    <h2>🛡️ Safe & Secure</h2>
+    <p>Smart system to reduce risk of WhatsApp bans and account restrictions.</p>
+  </div>
+  <div class="card">
+    <h2>⚡ Automation Tools</h2>
+    <p>Autoresponders, sequences, templates, and scheduled campaigns.</p>
+  </div>
+</section></body>
+</html>
