@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Tap2Send</title>
+    <style>
+        :root {
+            --madina-green: #0C7A43;
+            --golden: #D4AF37;
+            --blue: #1E3A8A;
+            --white: #FFFFFF;
+            --light-green: #E8F5E8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: var(--white);
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            padding: 2rem 1rem;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--madina-green);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .nav-links a {
+            padding: 1rem;
+            text-decoration: none;
+            color: #333;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background: var(--madina-green);
+            color: var(--white);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .payment-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .payment-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .payment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .plan-summary {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--madina-green);
+        }
+        
+        .payment-form {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+        
+        .plan-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .plan-features li:before {
+            content: "✓";
+            color: var(--madina-green);
+            font-weight: bold;
+        }
+        
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--madina-green);
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-period {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--madina-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(12, 122, 67, 0.1);
+        }
+        
+        .card-input-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+        
+        .btn-primary {
+            background: var(--madina-green);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: #085C34;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(12, 122, 67, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .payment-methods {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .payment-method {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method.active {
+            border-color: var(--madina-green);
+            background: var(--light-green);
+        }
+        
+        .payment-method-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .security-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            opacity: 0.7;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--madina-green);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .billing-cycle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .billing-option {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .billing-option.active {
+            border-color: var(--madina-green);
+            background: var(--light-green);
+        }
+        
+        .discount-badge {
+            background: var(--golden);
+            color: var(--white);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .payment-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-input-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">Tap2Send</div>
+        <div class="nav-links">
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="connect-whatsapp.html">📱 Connect WhatsApp</a>
+            <a href="campaigns.html">📨 Campaigns</a>
+            <a href="templates.html">📝 Templates</a>
+            <a href="autoresponder.html">🤖 Auto Responder</a>
+            <a href="settings.html">⚙️ Settings</a>
+            <a href="pricing.html">💰 Pricing</a>
+            <a href="#" onclick="logout()">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="payment-container">
+            <div class="payment-header">
+                <h1 style="color: var(--blue); margin-bottom: 0.5rem;">Complete Your Purchase</h1>
+                <p style="color: #666;">Upgrade your Tap2Send plan to unlock premium features</p>
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="payment-grid">
+                <!-- Plan Summary -->
+                <div class="plan-summary">
+                    <h2 style="color: var(--blue); margin-bottom: 1rem;">Order Summary</h2>
+                    <div id="selectedPlan">
+                        <!-- Plan details will be loaded here -->
+                    </div>
+                    
+                    <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #e0e0e0;">
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Tax:</span>
+                        <span id="tax">$0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem;">
+                        <span>Total:</span>
+                        <span id="total">$0.00</span>
+                    </div>
+                    
+                    <div class="security-badges">
+                        <span>🔒 SSL Secure</span>
+                        <span>🛡️ PCI Compliant</span>
+                        <span>💰 Money Back Guarantee</span>
+                    </div>
+                </div>
+
+                <!-- Payment Form -->
+                <div class="payment-form">
+                    <h2 style="color: var(--blue); margin-bottom: 1.5rem;">Payment Details</h2>
+                    
+                    <!-- Billing Cycle -->
+                    <div class="form-group">
+                        <label>Billing Cycle</label>
+                        <div class="billing-cycle">
+                            <div class="billing-option active" onclick="selectBillingCycle('monthly')">
+                                Monthly
+                            </div>
+                            <div class="billing-option" onclick="selectBillingCycle('yearly')">
+                                Yearly <span class="discount-badge">Save 20%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Method -->
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <div class="payment-methods">
+                            <div class="payment-method active" onclick="selectPaymentMethod('card')">
+                                <div class="payment-method-icon">💳</div>
+                                <div>Credit Card</div>
+                            </div>
+                            <div class="payment-method" onclick="selectPaymentMethod('paypal')">
+                                <div class="payment-method-icon">🔵</div>
+                                <div>PayPal</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Payment Form -->
+                    <div id="cardForm">
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number</label>
+                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+                        
+                        <div class="card-input-group">
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date</label>
+                                <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" placeholder="123" maxlength="3">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cardName">Name on Card</label>
+                            <input type="text" id="cardName" placeholder="John Doe">
+                        </div>
+                    </div>
+                    
+                    <!-- PayPal Form (Hidden by default) -->
+                    <div id="paypalForm" style="display: none;">
+                        <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 8px;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🔵</div>
+                            <p>You will be redirected to PayPal to complete your payment</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="couponCode">Coupon Code (Optional)</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="couponCode" placeholder="Enter coupon code" style="flex: 1;">
+                            <button type="button" class="btn btn-outline" onclick="applyCoupon()" style="width: auto; padding: 0.8rem 1rem;">Apply</button>
+                        </div>
+                        <small id="couponMessage" style="color: #666;"></small>
+                    </div>
+                    
+                    <div class="loading-spinner" id="loadingSpinner">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 1rem;">Processing payment...</p>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary" onclick="processPayment()" id="payButton">
+                        Complete Payment - <span id="payAmount">$0.00</span>
+                    </button>
+                    
+                    <p style="text-align: center; margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        By completing this purchase, you agree to our <a href="#" style="color: var(--madina-green);">Terms of Service</a> and <a href="#" style="color: var(--madina-green);">Privacy Policy</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+            authDomain: "tap2send-8e72d.firebaseapp.com",
+            projectId: "tap2send-8e72d",
+            storageBucket: "tap2send-8e72d.firebasestorage.app",
+            messagingSenderId: "572191430506",
+            appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        let currentUser = null;
+        let selectedPlan = 'pro';
+        let billingCycle = 'monthly';
+        let paymentMethod = 'card';
+        let appliedCoupon = null;
+        let couponDiscount = 0;
+        
+        // Plan pricing
+        const planPrices = {
+            pro: { monthly: 29, yearly: 278 }, // 29 * 12 * 0.8 = 278.4
+            business: { monthly: 99, yearly: 950 } // 99 * 12 * 0.8 = 950.4
+        };
+        
+        // Plan features
+        const planFeatures = {
+            pro: [
+                '5,000 messages per month',
+                'Advanced WhatsApp automation',
+                '50 auto responder rules',
+                'Unlimited templates',
+                'Priority support',
+                'Advanced API features',
+                'Bulk messaging',
+                'Analytics dashboard'
+            ],
+            business: [
+                'Unlimited messages',
+                'Enterprise-grade automation',
+                'Unlimited auto responders',
+                'Unlimited templates',
+                '24/7 dedicated support',
+                'Full API access',
+                'Custom integrations',
+                'White-label options',
+                'Team collaboration'
+            ]
+        };
+        
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'auth.html';
+            } else {
+                currentUser = user;
+                loadPlanFromURL();
+                updatePaymentSummary();
+            }
+        });
+        
+        function loadPlanFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const plan = urlParams.get('plan');
+            
+            if (plan && (plan === 'pro' || plan === 'business')) {
+                selectedPlan = plan;
+            }
+            
+            updatePlanDisplay();
+        }
+        
+        function updatePlanDisplay() {
+            const planElement = document.getElementById('selectedPlan');
+            const price = planPrices[selectedPlan][billingCycle];
+            const features = planFeatures[selectedPlan];
+            
+            planElement.innerHTML = `
+                <h3 style="color: var(--blue); margin-bottom: 0.5rem;">
+                    ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} Plan
+                </h3>
+                <div class="plan-price">$${price}</div>
+                <div class="plan-period">${billingCycle === 'monthly' ? 'per month' : 'per year'}</div>
+                <ul class="plan-features">
+                    ${features.map(feature => `<li>${feature}</li>`).join('')}
+                </ul>
+            `;
+            
+            updatePaymentSummary();
+        }
+        
+        function updatePaymentSummary() {
+            const price = planPrices[selectedPlan][billingCycle];
+            const tax = price * 0.1; // 10% tax
+            const subtotal = price - couponDiscount;
+            const total = subtotal + tax;
+            
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('payAmount').textContent = `$${total.toFixed(2)}`;
+        }
+        
+        function selectBillingCycle(cycle) {
+            billingCycle = cycle;
+            
+            // Update UI
+            document.querySelectorAll('.billing-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updatePlanDisplay();
+        }
+        
+        function selectPaymentMethod(method) {
+            paymentMethod = method;
+            
+            // Update UI
+            document.querySelectorAll('.payment-method').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide forms
+            if (method === 'card') {
+                document.getElementById('cardForm').style.display = 'block';
+                document.getElementById('paypalForm').style.display = 'none';
+            } else {
+                document.getElementById('cardForm').style.display = 'none';
+                document.getElementById('paypalForm').style.display = 'block';
+            }
+        }
+        
+        function applyCoupon() {
+            const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
+            const couponMessage = document.getElementById('couponMessage');
+            
+            // Simulate coupon validation
+            const validCoupons = {
+                'WELCOME10': 0.1, // 10% discount
+                'PRO20': 0.2,     // 20% discount
+                'BUSINESS25': 0.25 // 25% discount
+            };
+            
+            if (validCoupons[couponCode]) {
+                const discountRate = validCoupons[couponCode];
+                const price = planPrices[selectedPlan][billingCycle];
+                couponDiscount = price * discountRate;
+                appliedCoupon = couponCode;
+                
+                couponMessage.textContent = `Coupon applied! ${discountRate * 100}% discount.`;
+                couponMessage.style.color = 'var(--madina-green)';
+                
+                updatePaymentSummary();
+            } else {
+                couponDiscount = 0;
+                appliedCoupon = null;
+                couponMessage.textContent = 'Invalid coupon code.';
+                couponMessage.style.color = '#dc3545';
+                
+                updatePaymentSummary();
+            }
+        }
+        
+        function validatePaymentForm() {
+            if (paymentMethod === 'card') {
+                const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+                const expiryDate = document.getElementById('expiryDate').value;
+                const cvv = document.getElementById('cvv').value;
+                const cardName = document.getElementById('cardName').value;
+                
+                if (!cardNumber || cardNumber.length !== 16) {
+                    showMessage('Please enter a valid 16-digit card number', 'error');
+                    return false;
+                }
+                
+                if (!expiryDate || !expiryDate.match(/^(0[1-9]|1[0-2])\/([0-9]{2})$/)) {
+                    showMessage('Please enter a valid expiry date (MM/YY)', 'error');
+                    return false;
+                }
+                
+                if (!cvv || cvv.length !== 3) {
+                    showMessage('Please enter a valid 3-digit CVV', 'error');
+                    return false;
+                }
+                
+                if (!cardName) {
+                    showMessage('Please enter the name on card', 'error');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        function processPayment() {
+            if (!validatePaymentForm()) {
+                return;
+            }
+            
+            // Show loading spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('payButton').disabled = true;
+            
+            // Simulate payment processing
+            setTimeout(() => {
+                completePayment();
+            }, 3000);
+        }
+        
+        function completePayment() {
+            const price = planPrices[selectedPlan][billingCycle];
+            const tax = price * 0.1;
+            const subtotal = price - couponDiscount;
+            const total = subtotal + tax;
+            
+            // Create payment record in Firestore
+            const paymentData = {
+                userId: currentUser.uid,
+                plan: selectedPlan,
+                billingCycle: billingCycle,
+                amount: total,
+                subtotal: subtotal,
+                tax: tax,
+                coupon: appliedCoupon,
+                discount: couponDiscount,
+                paymentMethod: paymentMethod,
+                status: 'completed',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                expiresAt: getExpiryDate()
+            };
+            
+            db.collection('payments').add(paymentData)
+                .then((paymentRef) => {
+                    // Update user subscription
+                    return db.collection('users').doc(currentUser.uid).update({
+                        subscription: selectedPlan,
+                        messagesLimit: selectedPlan === 'pro' ? 5000 : 999999,
+                        currentPaymentId: paymentRef.id,
+                        subscriptionExpires: getExpiryDate(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    // Hide loading spinner
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    
+                    // Show success message
+                    showMessage('Payment completed successfully! Redirecting to dashboard...', 'success');
+                    
+                    // Redirect to dashboard after delay
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                })
+                .catch((error) => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    document.getElementById('payButton').disabled = false;
+                    showMessage('Payment failed: ' + error.message, 'error');
+                });
+        }
+        
+        function getExpiryDate() {
+            const now = new Date();
+            if (billingCycle === 'monthly') {
+                now.setMonth(now.getMonth() + 1);
+            } else {
+                now.setFullYear(now.getFullYear() + 1);
+            }
+            return firebase.firestore.Timestamp.fromDate(now);
+        }
+        
+        function showMessage(message, type) {
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = message;
+            msgEl.className = `message ${type}`;
+            msgEl.style.display = 'block';
+            setTimeout(() => msgEl.style.display = 'none', 5000);
+        }
+        
+        // Format card number input
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            if (value.length > 0) {
+                value = value.match(new RegExp('.{1,4}', 'g')).join(' ');
+            }
+            e.target.value = value;
+        });
+        
+        // Format expiry date input
+        document.getElementById('expiryDate').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+        
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+</html>
