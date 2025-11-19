@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Tap2Send</title>
+    <style>
+        :root {
+            --madina-green: #0C7A43;
+            --golden: #D4AF37;
+            --blue: #1E3A8A;
+            --white: #FFFFFF;
+            --light-green: #E8F5E8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: var(--white);
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            padding: 2rem 1rem;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--madina-green);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .nav-links a {
+            padding: 1rem;
+            text-decoration: none;
+            color: #333;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background: var(--madina-green);
+            color: var(--white);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        
+        .settings-container {
+            max-width: 800px;
+        }
+        
+        .settings-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .settings-section h2 {
+            color: var(--blue);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light-green);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--madina-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(12, 122, 67, 0.1);
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--madina-green);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: #085C34;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: var(--white);
+        }
+        
+        .subscription-info {
+            background: linear-gradient(135deg, var(--madina-green), var(--blue));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .api-token {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px dashed #ccc;
+            font-family: monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--light-green);
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--madina-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">Tap2Send</div>
+        <div class="nav-links">
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="connect-whatsapp.html">📱 Connect WhatsApp</a>
+            <a href="campaigns.html">📨 Campaigns</a>
+            <a href="templates.html">📝 Templates</a>
+            <a href="autoresponder.html">🤖 Auto Responder</a>
+            <a href="settings.html" class="active">⚙️ Settings</a>
+            <a href="#" onclick="logout()">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="settings-container">
+            <h1 style="color: var(--blue); margin-bottom: 2rem;">Account Settings</h1>
+            
+            <div id="message" class="message"></div>
+            
+            <!-- Profile Settings -->
+            <div class="settings-section">
+                <h2>Profile Information</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="userName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="userEmail" required readonly style="background: #f8f9fa;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+            
+            <!-- Subscription Info -->
+            <div class="settings-section">
+                <h2>Subscription Plan</h2>
+                <div class="subscription-info">
+                    <h3 id="subscriptionPlan">Free Plan</h3>
+                    <p id="subscriptionDetails">150 messages per month</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="messagesUsed">0</div>
+                        <div>Messages Used</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="messagesRemaining">150</div>
+                        <div>Messages Remaining</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="campaignsCount">0</div>
+                        <div>Total Campaigns</div>
+                    </div>
+                </div>
+                <a href="pricing.html" class="btn btn-primary">Upgrade Plan</a>
+            </div>
+            
+            <!-- API Settings -->
+            <div class="settings-section">
+                <h2>API Integration</h2>
+                <div class="form-group">
+                    <label>Your API Token</label>
+                    <div class="api-token">
+                        <span id="apiTokenDisplay">Loading...</span>
+                        <button type="button" class="btn btn-primary" onclick="copyApiToken()">Copy</button>
+                    </div>
+                    <small>Use this token to authenticate your API requests</small>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="generateNewToken()">Generate New Token</button>
+            </div>
+            
+            <!-- Password Change -->
+            <div class="settings-section">
+                <h2>Change Password</h2>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPassword" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
+            
+            <!-- Danger Zone -->
+            <div class="settings-section" style="border-left: 4px solid #dc3545;">
+                <h2 style="color: #dc3545;">Danger Zone</h2>
+                <div class="form-group">
+                    <p>Once you delete your account, there is no going back. Please be certain.</p>
+                    <button type="button" class="btn btn-danger" onclick="deleteAccount()">Delete My Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+            authDomain: "tap2send-8e72d.firebaseapp.com",
+            projectId: "tap2send-8e72d",
+            storageBucket: "tap2send-8e72d.firebasestorage.app",
+            messagingSenderId: "572191430506",
+            appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        let currentUser = null;
+        let userData = null;
+        
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'auth.html';
+            } else {
+                currentUser = user;
+                loadUserData(user.uid);
+            }
+        });
+        
+        function loadUserData(uid) {
+            // Load user data from Firestore
+            db.collection('users').doc(uid).onSnapshot((doc) => {
+                if (doc.exists) {
+                    userData = doc.data();
+                    updateUI(userData);
+                }
+            });
+            
+            // Load campaigns count
+            db.collection('campaigns').where('userId', '==', uid)
+                .onSnapshot((snapshot) => {
+                    document.getElementById('campaignsCount').textContent = snapshot.size;
+                });
+        }
+        
+        function updateUI(data) {
+            document.getElementById('userName').value = data.name || '';
+            document.getElementById('userEmail').value = currentUser.email;
+            document.getElementById('apiTokenDisplay').textContent = data.apiToken || 'Not set';
+            
+            const messagesUsed = data.messagesUsed || 0;
+            const messagesLimit = data.messagesLimit || 150;
+            const messagesRemaining = Math.max(0, messagesLimit - messagesUsed);
+            
+            document.getElementById('messagesUsed').textContent = messagesUsed;
+            document.getElementById('messagesRemaining').textContent = messagesRemaining;
+            
+            const subscription = data.subscription || 'free';
+            document.getElementById('subscriptionPlan').textContent = 
+                subscription.charAt(0).toUpperCase() + subscription.slice(1) + ' Plan';
+            
+            let subscriptionDetails = '';
+            switch(subscription) {
+                case 'free':
+                    subscriptionDetails = '150 messages per month';
+                    break;
+                case 'pro':
+                    subscriptionDetails = '5,000 messages per month';
+                    break;
+                case 'business':
+                    subscriptionDetails = 'Unlimited messages';
+                    break;
+                default:
+                    subscriptionDetails = '150 messages per month';
+            }
+            document.getElementById('subscriptionDetails').textContent = subscriptionDetails;
+        }
+        
+        function showMessage(message, type) {
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = message;
+            msgEl.className = `message ${type}`;
+            msgEl.style.display = 'block';
+            setTimeout(() => msgEl.style.display = 'none', 5000);
+        }
+        
+        // Profile Update
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('userName').value;
+            
+            db.collection('users').doc(currentUser.uid).update({
+                name: name,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                showMessage('Profile updated successfully!', 'success');
+            }).catch((error) => {
+                showMessage('Error updating profile: ' + error.message, 'error');
+            });
+        });
+        
+        // Password Change
+        document.getElementById('passwordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('New passwords do not match!', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showMessage('Password must be at least 6 characters long!', 'error');
+                return;
+            }
+            
+            // Reauthenticate user first
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                currentUser.email, 
+                currentPassword
+            );
+            
+            currentUser.reauthenticateWithCredential(credential)
+                .then(() => {
+                    // Now change password
+                    return currentUser.updatePassword(newPassword);
+                })
+                .then(() => {
+                    showMessage('Password changed successfully!', 'success');
+                    document.getElementById('passwordForm').reset();
+                })
+                .catch((error) => {
+                    if (error.code === 'auth/wrong-password') {
+                        showMessage('Current password is incorrect!', 'error');
+                    } else {
+                        showMessage('Error changing password: ' + error.message, 'error');
+                    }
+                });
+        });
+        
+        function copyApiToken() {
+            const token = document.getElementById('apiTokenDisplay').textContent;
+            navigator.clipboard.writeText(token).then(() => {
+                showMessage('API token copied to clipboard!', 'success');
+            });
+        }
+        
+        function generateNewToken() {
+            if (confirm('Are you sure you want to generate a new API token? This will invalidate your current token.')) {
+                const newToken = 'T2S_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                
+                db.collection('users').doc(currentUser.uid).update({
+                    apiToken: newToken,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    showMessage('New API token generated successfully!', 'success');
+                }).catch((error) => {
+                    showMessage('Error generating token: ' + error.message, 'error');
+                });
+            }
+        }
+        
+        function deleteAccount() {
+            if (confirm('Are you absolutely sure? This will permanently delete your account and all your data. This action cannot be undone.')) {
+                const confirmText = prompt('Type "DELETE" to confirm account deletion:');
+                if (confirmText === 'DELETE') {
+                    // Delete user data from Firestore first
+                    db.collection('users').doc(currentUser.uid).delete()
+                        .then(() => {
+                            // Then delete authentication account
+                            return currentUser.delete();
+                        })
+                        .then(() => {
+                            alert('Account deleted successfully. Goodbye!');
+                            window.location.href = 'index.html';
+                        })
+                        .catch((error) => {
+                            showMessage('Error deleting account: ' + error.message, 'error');
+                        });
+                } else {
+                    showMessage('Account deletion cancelled.', 'error');
+                }
+            }
+        }
+        
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+</html>
