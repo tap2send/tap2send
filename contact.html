@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Tap2Send</title>
+    <style>
+        :root {
+            --madina-green: #0C7A43;
+            --golden: #D4AF37;
+            --blue: #1E3A8A;
+            --white: #FFFFFF;
+            --light-green: #E8F5E8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--white) 0%, var(--light-green) 100%);
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: var(--white);
+            box-shadow: 0 2px 20px rgba(12, 122, 67, 0.1);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--madina-green);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--blue);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+        
+        .nav-links a:hover {
+            background: var(--madina-green);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+        
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: var(--madina-green);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: #085C34;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(12, 122, 67, 0.3);
+        }
+        
+        .contact-hero {
+            padding: 8rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .contact-hero h1 {
+            font-size: 3rem;
+            color: var(--blue);
+            margin-bottom: 1rem;
+        }
+        
+        .contact-hero p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .contact-info {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .contact-form {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .info-item:hover {
+            background: var(--light-green);
+            transform: translateX(5px);
+        }
+        
+        .info-icon {
+            font-size: 1.5rem;
+            color: var(--madina-green);
+            width: 40px;
+            height: 40px;
+            background: var(--light-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: var(--madina-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(12, 122, 67, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span>📱</span>
+                Tap2Send
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="about.html">About</a>
+                <a href="contact.html" class="active">Contact</a>
+                <a href="auth.html" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="contact-hero">
+        <h1>Get In Touch</h1>
+        <p>Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+    </section>
+
+    <!-- Contact Content -->
+    <div class="contact-container">
+        <!-- Contact Information -->
+        <div class="contact-info">
+            <h2 style="color: var(--blue); margin-bottom: 2rem;">Contact Information</h2>
+            
+            <div class="info-item">
+                <div class="info-icon">📧</div>
+                <div>
+                    <h3>Email</h3>
+                    <p>support@tap2send.com</p>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon">📞</div>
+                <div>
+                    <h3>Phone</h3>
+                    <p>+1 (555) 123-4567</p>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon">🏢</div>
+                <div>
+                    <h3>Office</h3>
+                    <p>123 Business Ave, Suite 100<br>San Francisco, CA 94107</p>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-icon">🕒</div>
+                <div>
+                    <h3>Business Hours</h3>
+                    <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 4:00 PM</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="contact-form">
+            <h2 style="color: var(--blue); margin-bottom: 2rem;">Send us a Message</h2>
+            
+            <div id="message" class="message"></div>
+            
+            <form id="contactForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject" required>
+                        <option value="">Select a subject</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="support">Technical Support</option>
+                        <option value="billing">Billing Question</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="partnership">Partnership</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="messageText">Message</label>
+                    <textarea id="messageText" required placeholder="Tell us how we can help you..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="newsletter" checked>
+                        <span>Subscribe to our newsletter for updates</span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+            authDomain: "tap2send-8e72d.firebaseapp.com",
+            projectId: "tap2send-8e72d",
+            storageBucket: "tap2send-8e72d.firebasestorage.app",
+            messagingSenderId: "572191430506",
+            appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        let currentUser = null;
+        
+        // Check authentication state
+        auth.onAuthStateChanged((user) => {
+            const navLinks = document.getElementById('navLinks');
+            if (user) {
+                currentUser = user;
+                // User is signed in
+                navLinks.innerHTML = `
+                    <a href="dashboard.html">Dashboard</a>
+                    <a href="pricing.html">Pricing</a>
+                    <a href="about.html">About</a>
+                    <a href="contact.html" class="active">Contact</a>
+                    <a href="#" onclick="logout()" class="btn btn-primary">Logout</a>
+                `;
+                
+                // Pre-fill form with user data if available
+                loadUserData(user.uid);
+            }
+        });
+        
+        function loadUserData(uid) {
+            db.collection('users').doc(uid).get().then((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    document.getElementById('name').value = userData.name || '';
+                    document.getElementById('email').value = userData.email || '';
+                }
+            });
+        }
+        
+        function showMessage(message, type) {
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = message;
+            msgEl.className = `message ${type}`;
+            msgEl.style.display = 'block';
+            setTimeout(() => msgEl.style.display = 'none', 5000);
+        }
+        
+        // Contact Form Submission
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const contactData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('messageText').value,
+                newsletter: document.getElementById('newsletter').checked,
+                userId: currentUser ? currentUser.uid : null,
+                status: 'new',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            // Save to Firestore
+            db.collection('contact_messages').add(contactData)
+                .then(() => {
+                    showMessage('Thank you for your message! We\'ll get back to you within 24 hours.', 'success');
+                    document.getElementById('contactForm').reset();
+                    
+                    // Re-fill user data if logged in
+                    if (currentUser) {
+                        loadUserData(currentUser.uid);
+                    }
+                })
+                .catch((error) => {
+                    showMessage('Error sending message: ' + error.message, 'error');
+                });
+        });
+        
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+</html>
