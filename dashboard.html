@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap2Send • Dashboard</title>
+
+<!-- MAIN STYLE -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #f5f6fa;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: #003d2e;  /* Madina Green Dark */
+  color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 25px 0;
+}
+
+.sidebar h2 {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 30px;
+  color: #ffd700; /* Golden */
+}
+
+.sidebar a {
+  display: block;
+  padding: 14px 25px;
+  text-decoration: none;
+  color: #fff;
+  font-size: 15px;
+  border-left: 3px solid transparent;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  background: #005f46;
+  border-left: 3px solid #ffd700;
+}
+
+/* CONTENT AREA */
+.content {
+  margin-left: 260px;
+  padding: 25px;
+}
+
+/* PAGE TITLE */
+.page-title {
+  font-size: 30px;
+  font-weight: 600;
+  color: #003d2e;
+}
+
+/* STATS CARDS */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 32px;
+  font-weight: bold;
+  color: #003d2e;
+}
+
+/* ACTION BUTTONS */
+.actions {
+  margin-top: 40px;
+}
+
+.actions a {
+  margin-right: 15px;
+  padding: 12px 20px;
+  text-decoration: none;
+  background: #0077ff;
+  color: white;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.actions a:hover {
+  background: #005fcc;
+}
+
+/* TOKEN EXPIRY BAR */
+.expiry-box {
+  margin-top: 40px;
+  padding: 20px;
+  background: #fff3cd;
+  border-left: 5px solid #ffcc00;
+  border-radius: 10px;
+}
+</style>
+</head>
+
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>Tap2Send</h2>
+
+  <a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a>
+  <a href="connect-whatsapp.html"><i class="fa fa-link"></i> Connect WhatsApp</a>
+  <a href="bulk.html"><i class="fa fa-paper-plane"></i> Bulk Sender</a>
+  <a href="templates.html-part1"><i class="fa fa-book"></i> Templates</a>
+  <a href="automation.html"><i class="fa fa-robot"></i> Automation</a>
+  <a href="campaigns.html"><i class="fa fa-bullhorn"></i> Campaigns</a>
+  <a href="analytics.html"><i class="fa fa-chart-line"></i> Analytics</a>
+  <a href="pricing.html"><i class="fa fa-tags"></i> Pricing</a>
+  <a href="billing.html"><i class="fa fa-wallet"></i> Billing</a>
+  <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+  <a href="settings.html"><i class="fa fa-gear"></i> Settings</a>
+  <a href="contact.html"><i class="fa fa-headset"></i> Support / Tickets</a>
+  <a href="login.html"><i class="fa fa-sign-out"></i> Logout</a>
+</div>
+
+<!-- CONTENT AREA -->
+<div class="content">
+
+  <div class="page-title">Dashboard Overview</div>
+
+  <!-- STATS CARDS -->
+  <div class="cards">
+    <div class="card">
+      <h3>Messages Sent Today</h3>
+      <p id="todayCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Messages</h3>
+      <p id="totalCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Active Templates</h3>
+      <p id="templatesCount">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Subscribers</h3>
+      <p id="subsCount">0</p>
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="actions">
+    <a href="bulk.html">Send Bulk</a>
+    <a href="automation.html">Create Automation</a>
+    <a href="templates.html-part1">Create Template</a>
+  </div>
+
+  <!-- TOKEN EXPIRY WARNING -->
+  <div class="expiry-box" id="tokenBox">
+    <strong>⚠ Token Status:</strong> Your WhatsApp API token will expire in <span id="expiryDays">30</span> days.
+  </div>
+
+</div>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+import firebaseConfig from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore();
+
+// GET USER DATA
+async function loadDashboard() {
+  let user = localStorage.getItem("tap2send_user");
+  if (!user) return;
+
+  let userRef = doc(db, "users", user);
+  let snap = await getDoc(userRef);
+
+  if (snap.exists()) {
+    let data = snap.data();
+
+    document.getElementById("todayCount").innerText = data.today || 0;
+    document.getElementById("totalCount").innerText = data.total || 0;
+    document.getElementById("templatesCount").innerText = data.templates || 0;
+    document.getElementById("subsCount").innerText = data.subscribers || 0;
+
+    let daysLeft = data.token_expiry || 30;
+    document.getElementById("expiryDays").innerText = daysLeft;
+  }
+}
+
+loadDashboard();
+</script>
+
+</body>
+</html>
