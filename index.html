@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tap2Send – WhatsApp Automation</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<style>
+:root{
+  --green:#0C7A43;
+  --blue:#1E3A8A;
+  --gold:#D4AF37;
+  --white:#ffffff;
+}
+
+/* HERO */
+.hero-bg{
+  background: linear-gradient(130deg, var(--green), var(--blue));
+  background-size: 300% 300%;
+  animation: heroAnim 10s ease infinite alternate;
+}
+@keyframes heroAnim {
+  0%{background-position:left}
+  100%{background-position:right}
+}
+
+/* GLASS CARD FIX */
+.glass-card{
+  background: rgba(255,255,255,0.32);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 25px;
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+.glass-text{
+  color:#0C7A43 !important;
+}
+.glass-title{
+  font-size: 22px;
+  font-weight: 700;
+  color:#1E3A8A;
+}
+
+/* Fade animation */
+.fade-up {
+  opacity:0;
+  transform:translateY(25px);
+  animation: fadeUp .9s forwards ease;
+}
+@keyframes fadeUp{
+  to{opacity:1;transform:translateY(0);}
+}
+</style>
+</head>
+
+<body class="bg-gray-50">
+
+<!-- NAVBAR -->
+<nav class="flex justify-between items-center px-8 py-5 shadow-lg bg-white sticky top-0 z-50">
+  <h1 class="text-3xl font-extrabold text-green-700">Tap2Send</h1>
+  <div class="space-x-6 hidden md:flex">
+    <a href="#about" class="hover:text-green-600 font-semibold">About</a>
+    <a href="#features" class="hover:text-green-600 font-semibold">Features</a>
+    <a href="#pricing" class="hover:text-green-600 font-semibold">Pricing</a>
+  </div>
+  <a href="auth.html" class="px-6 py-2 bg-green-600 text-white rounded-xl shadow hover:bg-green-700">
+    Login
+  </a>
+</nav>
+
+<!-- HERO -->
+<header class="hero-bg text-white text-center py-32 px-6 shadow-2xl">
+  <h1 class="text-5xl md:text-6xl font-extrabold mb-6 fade-up" style="animation-delay:0.2s;">
+    Automate WhatsApp Like a Pro 🚀
+  </h1>
+  <p class="text-lg md:text-xl max-w-2xl mx-auto opacity-90 mb-10 fade-up" style="animation-delay:0.5s;">
+    Official WhatsApp Cloud API • Unlimited Messaging • AI Automation •  
+    Start in 60 seconds. No technical setup needed.
+  </p>
+
+  <a href="auth.html" 
+     class="fade-up inline-block px-10 py-4 bg-yellow-400 text-black font-bold rounded-xl 
+            shadow-xl hover:scale-105 transform transition-all"
+     style="animation-delay:0.8s;">
+     Get Started Free →
+  </a>
+</header>
+
+<!-- ABOUT -->
+<section id="about" class="max-w-7xl mx-auto py-20 px-6">
+  <h2 class="text-4xl font-bold text-center text-blue-800 mb-12">About Tap2Send</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+    <div class="glass-card fade-up" style="animation-delay:0.1s;">
+      <h3 class="glass-title">🚀 Our Mission</h3>
+      <p class="glass-text">Empower businesses with zero-effort WhatsApp automation.</p>
+    </div>
+
+    <div class="glass-card fade-up" style="animation-delay:0.3s;">
+      <h3 class="glass-title">⚙ Technology</h3>
+      <p class="glass-text">Powered by Official WhatsApp Cloud API + Firebase.</p>
+    </div>
+
+    <div class="glass-card fade-up" style="animation-delay:0.5s;">
+      <h3 class="glass-title">💡 Vision</h3>
+      <p class="glass-text">Make advanced automation possible for everyone.</p>
+    </div>
+
+    <div class="glass-card fade-up" style="animation-delay:0.7s;">
+      <h3 class="glass-title">🌍 Who Uses Us</h3>
+      <p class="glass-text">Agencies, creators, businesses & automation lovers.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="bg-gray-100 py-20 px-6">
+  <h2 class="text-4xl font-bold text-center text-green-700 mb-14">Why Tap2Send?</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
+
+    <div class="p-8 bg-white rounded-2xl shadow-lg fade-up" style="animation-delay:0.2s;">
+      <h3 class="text-2xl font-bold mb-3 text-green-700">📩 Unlimited Bulk Messages</h3>
+      <p>Send thousands via official WhatsApp Cloud API.</p>
+    </div>
+
+    <div class="p-8 bg-white rounded-2xl shadow-lg fade-up" style="animation-delay:0.4s;">
+      <h3 class="text-2xl font-bold mb-3 text-blue-700">🤖 AI Auto-Replies</h3>
+      <p>Smart 24/7 customer handling using intelligent responses.</p>
+    </div>
+
+    <div class="p-8 bg-white rounded-2xl shadow-lg fade-up" style="animation-delay:0.6s;">
+      <h3 class="text-2xl font-bold mb-3 text-yellow-600">📊 Campaign Builder</h3>
+      <p>Schedule messages & create marketing automation flows.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="max-w-7xl mx-auto py-20 px-6">
+  <h2 class="text-4xl font-bold text-center text-blue-700 mb-12">Simple Pricing</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+
+    <div class="p-8 bg-white shadow-xl rounded-3xl border-t-4 border-green-600">
+      <h3 class="text-2xl font-bold mb-3">Free</h3>
+      <p class="text-4xl font-bold text-green-700 mb-6">₹0</p>
+      <a href="auth.html" class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700">Start</a>
+    </div>
+
+    <div class="p-8 bg-white shadow-xl rounded-3xl border-t-4 border-blue-700">
+      <h3 class="text-2xl font-bold mb-3">Starter</h3>
+      <p class="text-4xl font-bold text-blue-700 mb-6">₹499</p>
+      <a href="auth.html" class="px-6 py-3 bg-blue-700 text-white rounded-xl hover:bg-blue-800">Start</a>
+    </div>
+
+    <div class="p-8 bg-white shadow-xl rounded-3xl border-t-4 border-yellow-500">
+      <h3 class="text-2xl font-bold mb-3">Pro</h3>
+      <p class="text-4xl font-bold text-yellow-600 mb-6">₹999</p>
+      <a href="auth.html" class="px-6 py-3 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700">Start</a>
+    </div>
+
+    <div class="p-8 bg-white shadow-xl rounded-3xl border-t-4 border-green-900">
+      <h3 class="text-2xl font-bold mb-3">Premium</h3>
+      <p class="text-4xl font-bold text-green-900 mb-6">₹1599</p>
+      <a href="auth.html" class="px-6 py-3 bg-green-900 text-white rounded-xl hover:bg-black">Start</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-white text-center py-10">
+  <p class="text-lg">Tap2Send © 2025</p>
+  <p class="text-gray-400">Smart WhatsApp Automation Platform</p>
+</footer>
+
+</body>
+</html>
