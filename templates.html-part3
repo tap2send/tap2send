@@ -1,0 +1,27 @@
+<!-- DELETE TEMPLATE -->
+<script>
+async function deleteTemplate(id) {
+  if (!confirm("Delete this template?")) return;
+
+  await db.collection("users")
+          .doc(currentUser.uid)
+          .collection("templates")
+          .doc(id)
+          .delete();
+
+  loadTemplates();
+}
+
+// ----------------------
+// LOGOUT
+// ----------------------
+function logout() {
+  auth.signOut()
+      .then(() => window.location.href = "login.html");
+}
+</script>
+
+</div> <!-- end main container -->
+
+</body>
+</html>
