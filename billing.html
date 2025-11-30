@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tap2Send • Billing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+
+  <style>
+    :root { --green:#0c7a43; --gold:#d4af37; --blue:#1e3a8a; }
+    .glass {
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.35);
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+
+<!-- NAV -->
+<div class="bg-white p-4 shadow flex justify-between">
+  <h1 class="text-2xl font-bold text-[var(--green)]">Tap2Send</h1>
+  <button onclick="logout()" class="text-red-600 font-bold">Logout</button>
+</div>
+
+<!-- HEADER -->
+<div class="max-w-3xl mx-auto text-center mt-10">
+  <h1 class="text-4xl font-bold text-[var(--blue)]">Billing</h1>
+  <p class="text-gray-600 text-lg">Manual Payment • Admin Verification Required</p>
+</div>
+
+<!-- CURRENT PLAN -->
+<div class="max-w-xl mx-auto glass p-6 rounded-2xl mt-10 shadow-lg">
+  <h2 class="text-2xl font-bold text-[var(--green)]">Current Status</h2>
+
+  <div id="planBox" class="mt-4 text-gray-700">
+    Loading...
+  </div>
+</div>
+
+<!-- PLANS -->
+<div class="max-w-5xl mx-auto mt-10 grid md:grid-cols-5 gap-6">
+
+  <div onclick="selectPlan('Free',0)" class="glass p-6 rounded-xl shadow hover:scale-105 cursor-pointer">
+    <h2 class="text-xl font-bold">Free</h2>
+    <p class="text-3xl font-bold mt-2">₹0</p>
+  </div>
+
+  <div onclick="selectPlan('Starter',499)" class="glass p-6 rounded-xl shadow hover:scale-105 cursor-pointer">
+    <h2 class="text-xl font-bold">Starter</h2>
+    <p class="text-3xl font-bold mt-2">₹499</p>
+  </div>
+
+  <div onclick="selectPlan('Pro',999)" class="glass p-6 rounded-xl shadow hover:scale-105 cursor-pointer border-2 border-[var(--gold)]">
+    <h2 class="text-xl font-bold">Pro</h2>
+    <p class="text-3xl font-bold mt-2">₹999</p>
+  </div>
+
+  <div onclick="selectPlan('Agency',1599)" class="glass p-6 rounded-xl shadow hover:scale-105 cursor-pointer">
+    <h2 class="text-xl font-bold">Agency</h2>
+    <p class="text-3xl font-bold mt-2">₹1599</p>
+  </div>
+
+  <div onclick="selectPlan('Enterprise',2399)" class="glass p-6 rounded-xl shadow hover:scale-105 cursor-pointer">
+    <h2 class="text-xl font-bold">Enterprise</h2>
+    <p class="text-3xl font-bold mt-2">₹2399</p>
+  </div>
+
+</div>
+
+<!-- POPUP -->
+<div id="popup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+  <div class="glass p-6 rounded-2xl w-full max-w-md text-center shadow-xl">
+    <h2 class="text-2xl font-bold text-[var(--blue)]">Complete Payment</h2>
+
+    <p class="mt-4">Pay using UPI:</p>
+    <p class="text-xl font-bold text-[var(--green)] mt-1">tradewithsyed@ybl</p>
+
+    <p class="mt-3">Amount: <span id="payAmt"></span></p>
+
+    <div class="mt-4">
+      <p class="text-sm text-gray-600">Upload Payment Screenshot:</p>
+      <input id="ss" type="file" accept="image/*" class="mt-2 w-full" />
+    </div>
+
+    <button onclick="submitPayment()" class="w-full bg-[var(--green)] text-white py-2 mt-5 rounded-xl">
+      Submit for Verification
+    </button>
+
+    <button onclick="closePopup()" class="w-full bg-gray-200 mt-3 py-2 rounded-xl">
+      Cancel
+    </button>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey:"AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain:"tap2send-8e72d.firebaseapp.com",
+  projectId:"tap2send-8e72d",
+  storageBucket:"tap2send-8e72d.firebasestorage.app",
+  messagingSenderId:"572191430506",
+  appId:"1:572191430506:web:3100a351c4be63fbf6b713"
+};
+firebase.initializeApp(firebaseConfig);
+
+const auth=firebase.auth();
+const db=firebase.firestore();
+const storage=firebase.storage();
+
+let USER=null;
+let P=null;
+let AMT=0;
+
+auth.onAuthStateChanged(u=>{
+  if(!u) return location.href="login.html";
+  USER=u;
+  load();
+});
+
+async function load(){
+  const d=await db.collection("users").doc(USER.uid).get();
+  const data=d.data();
+
+  if(data.paymentPending){
+    document.getElementById("planBox").innerHTML=
+      `<p class='font-bold text-yellow-600'>Payment Pending • Awaiting Verification</p>
+       <p>Plan: ${data.pendingPlan}</p>
+       <p>Amount: ₹${data.pendingAmount}</p>`;
+  }
+  else{
+    document.getElementById("planBox").innerHTML=
+      `<p class='font-bold text-[var(--green)]'>Plan: ${data.plan||"Free"}</p>`;
+  }
+}
+
+function selectPlan(plan,amount){
+  P=plan; AMT=amount;
+  document.getElementById("payAmt").innerText="₹"+amount;
+  document.getElementById("popup").classList.remove("hidden");
+}
+
+function closePopup(){
+  document.getElementById("popup").classList.add("hidden");
+}
+
+async function submitPayment(){
+  const file=document.getElementById("ss").files[0];
+  if(!file){ alert("Upload screenshot"); return; }
+
+  const ref=storage.ref(`payments/${USER.uid}_${Date.now()}.jpg`);
+  await ref.put(file);
+  const url=await ref.getDownloadURL();
+
+  await db.collection("users").doc(USER.uid).update({
+    paymentPending:true,
+    pendingPlan:P,
+    pendingAmount:AMT,
+    paymentScreenshot:url,
+    paymentTime:new Date().toISOString()
+  });
+
+  closePopup();
+  alert("Submitted! Admin will verify soon.");
+  load();
+}
+
+function logout(){ auth.signOut(); }
+</script>
+
+</body>
+</html>
