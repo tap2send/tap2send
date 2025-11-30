@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tap2Send • Settings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --green:#0C7A43;
+      --gold:#D4AF37;
+      --blue:#1E3A8A;
+      --white:#ffffff;
+    }
+    .fade{animation:fade .4s ease-in-out;}
+    @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
+
+  <!-- NAV -->
+  <nav class="bg-white shadow-lg p-4 flex justify-between items-center">
+    <div class="text-2xl font-bold text-[var(--green)]">Tap2Send</div>
+    <div class="flex gap-6">
+      <a href="dashboard.html" class="hover:text-[var(--green)] text-gray-700">Dashboard</a>
+      <a href="bulk.html" class="hover:text-[var(--green)] text-gray-700">Bulk</a>
+      <a href="templates.html" class="hover:text-[var(--green)] text-gray-700">Templates</a>
+      <a href="automation.html" class="hover:text-[var(--green)] text-gray-700">Automation</a>
+      <a href="campaigns.html" class="hover:text-[var(--green)] text-gray-700">Campaigns</a>
+      <a href="#" class="text-[var(--green)] font-semibold border-b-2 border-[var(--green)]">Settings</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="max-w-5xl mx-auto mt-8 fade">
+    <h1 class="text-3xl font-bold text-[var(--blue)] mb-2">Settings & API</h1>
+    <p class="text-gray-600 mb-6">
+      Manage your WhatsApp Cloud API connection, token expiry alerts, and basic account settings.
+    </p>
+
+    <!-- WHATSAPP API CARD -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold text-[var(--blue)] mb-3">WhatsApp Cloud API</h2>
+      <p class="text-sm text-gray-500 mb-4">
+        Loaded from: <code>whatsappAccounts / &lt;your uid&gt;</code> (saved by connect-whatsapp.html).
+      </p>
+
+      <div id="apiStatus" class="text-sm mb-4 text-gray-700">Loading connection...</div>
+
+      <div class="grid md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <div class="text-gray-500">WABA ID</div>
+          <div id="wabaId" class="font-mono bg-gray-100 p-2 rounded-lg">-</div>
+        </div>
+        <div>
+          <div class="text-gray-500">Phone Number ID</div>
+          <div id="phoneId" class="font-mono bg-gray-100 p-2 rounded-lg">-</div>
+        </div>
+        <div>
+          <div class="text-gray-500">Phone Number</div>
+          <div id="phoneNumber" class="bg-gray-100 p-2 rounded-lg">-</div>
+        </div>
+        <div>
+          <div class="text-gray-500">Token (masked)</div>
+          <div id="tokenMasked" class="bg-gray-100 p-2 rounded-lg">-</div>
+        </div>
+      </div>
+
+      <div class="mt-4 grid md:grid-cols-3 gap-4 text-sm">
+        <div>
+          <div class="text-gray-500">Connected At</div>
+          <div id="connectedAt" class="bg-gray-100 p-2 rounded-lg">-</div>
+        </div>
+        <div>
+          <div class="text-gray-500">Token Expires</div>
+          <div id="tokenExpiry" class="bg-gray-100 p-2 rounded-lg">-</div>
+        </div>
+        <div>
+          <div class="text-gray-500">Days Remaining</div>
+          <div id="daysRemaining" class="bg-gray-100 p-2 rounded-lg">-</div>
+        </div>
+      </div>
+
+      <div class="mt-5 flex flex-wrap gap-3">
+        <button
+          onclick="refreshConnection()"
+          class="px-4 py-2 bg-[var(--green)] text-white rounded-xl text-sm">
+          Refresh From Meta
+        </button>
+        <button
+          onclick="disconnectWhatsApp()"
+          class="px-4 py-2 bg-red-500 text-white rounded-xl text-sm">
+          Disconnect WhatsApp
+        </button>
+      </div>
+    </div>
+
+    <!-- TOKEN ALERTS -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold text-[var(--blue)] mb-3">Token Expiry Alert</h2>
+      <p class="text-gray-600 text-sm mb-4">
+        We can remind you inside Tap2Send when your token is close to expiring.
+      </p>
+
+      <div class="flex items-center gap-3 mb-4">
+        <input id="alertEnabled" type="checkbox" class="w-4 h-4" />
+        <label for="alertEnabled" class="text-sm text-gray-700">
+          Enable in-app reminder when &lt; 7 days left
+        </label>
+      </div>
+
+      <button
+        onclick="saveAlertSettings()"
+        class="px-4 py-2 bg-[var(--green)] text-white rounded-xl text-sm">
+        Save Alert Settings
+      </button>
+
+      <div id="alertMsg" class="text-xs mt-3 text-gray-500"></div>
+    </div>
+
+    <!-- ACCOUNT -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-10">
+      <h2 class="text-xl font-semibold text-[var(--blue)] mb-3">Account</h2>
+      <p class="text-sm text-gray-500 mb-3">
+        Logged in as: <span id="userEmail"></span>
+      </p>
+
+      <button
+        onclick="logout()"
+        class="px-4 py-2 bg-gray-200 rounded-xl text-sm">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // FIREBASE INIT
+    firebase.initializeApp({
+      apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+      authDomain: "tap2send-8e72d.firebaseapp.com",
+      projectId: "tap2send-8e72d",
+      storageBucket: "tap2send-8e72d.firebasestorage.app",
+      messagingSenderId: "572191430506",
+      appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+    });
+
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+    let currentUser = null;
+    let whatsappData = null;
+
+    auth.onAuthStateChanged(async (u)=>{
+      if(!u){ window.location = "index.html"; return; }
+      currentUser = u;
+      document.getElementById("userEmail").textContent = u.email || u.uid;
+      await loadWhatsAppInfo();
+      await loadAlertSettings();
+    });
+
+    async function loadWhatsAppInfo(){
+      const apiStatus = document.getElementById("apiStatus");
+      apiStatus.textContent = "Checking WhatsApp connection...";
+
+      const doc = await db.collection("whatsappAccounts").doc(currentUser.uid).get();
+      if(!doc.exists){
+        apiStatus.textContent = "Not connected. Please connect via Connect WhatsApp page.";
+        return;
+      }
+
+      whatsappData = doc.data();
+      apiStatus.textContent = "Connected to WhatsApp Cloud API.";
+
+      document.getElementById("wabaId").textContent = whatsappData.wabaId || "-";
+      document.getElementById("phoneId").textContent = whatsappData.phoneId || "-";
+      document.getElementById("phoneNumber").textContent = whatsappData.phoneNumber || "-";
+
+      const token = whatsappData.token || "";
+      const masked = token ? token.slice(0,8) + "********" : "-";
+      document.getElementById("tokenMasked").textContent = masked;
+
+      const connectedAt = whatsappData.connected_at ? new Date(whatsappData.connected_at) : null;
+      if(connectedAt){
+        document.getElementById("connectedAt").textContent = connectedAt.toLocaleString();
+      } else {
+        document.getElementById("connectedAt").textContent = "-";
+      }
+
+      // Assume 60 days from connected_at
+      if(connectedAt){
+        const expiry = new Date(connectedAt.getTime() + 60*24*60*60*1000);
+        document.getElementById("tokenExpiry").textContent = expiry.toLocaleString();
+
+        const now = new Date();
+        const diffMs = expiry - now;
+        const days  = Math.floor(diffMs / (1000*60*60*24));
+        document.getElementById("daysRemaining").textContent =
+          days >= 0 ? days+" days" : "Expired";
+      } else {
+        document.getElementById("tokenExpiry").textContent = "-";
+        document.getElementById("daysRemaining").textContent = "-";
+      }
+    }
+
+    async function refreshConnection(){
+      alert("Placeholder: yahan future me Meta se fresh data pull hoga via backend API.");
+    }
+
+    async function disconnectWhatsApp(){
+      if(!confirm("Disconnect WhatsApp from this account?")) return;
+      await db.collection("whatsappAccounts").doc(currentUser.uid).delete();
+      location.reload();
+    }
+
+    async function loadAlertSettings(){
+      const doc = await db.collection("users").doc(currentUser.uid).get();
+      if(doc.exists && doc.data().tokenAlertEnabled){
+        document.getElementById("alertEnabled").checked = true;
+      }
+    }
+
+    async function saveAlertSettings(){
+      const enabled = document.getElementById("alertEnabled").checked;
+      await db.collection("users").doc(currentUser.uid).set({
+        tokenAlertEnabled: enabled
+      },{merge:true});
+
+      document.getElementById("alertMsg").textContent =
+        "Saved! We'll highlight when token has less than 7 days left.";
+    }
+
+    function logout(){
+      auth.signOut().then(()=>window.location="index.html");
+    }
+  </script>
+</body>
+</html>
