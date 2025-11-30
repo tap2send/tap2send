@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Connect WhatsApp – Tap2Send</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+:root {
+    --green:#0C7A43;
+    --gold:#D4AF37;
+    --blue:#1E3A8A;
+}
+.bg-anim {
+    background: linear-gradient(120deg, var(--green), var(--blue));
+    background-size: 300% 300%;
+    animation: bg 8s infinite alternate;
+}
+@keyframes bg {
+    0% {background-position: left}
+    100% {background-position: right}
+}
+.spinner {
+    width:30px; height:30px;
+    border:3px solid #ddd;
+    border-top:3px solid var(--green);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+@keyframes spin {100%{transform:rotate(360deg)}}
+.btn {
+    background: var(--green);
+    border: 2px solid var(--gold);
+    transition: .3s;
+    color:white;
+}
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 18px rgba(212,175,55,.4);
+}
+</style>
+</head>
+
+<body class="bg-gray-100">
+
+<nav class="bg-anim p-4 text-white shadow-xl">
+  <div class="max-w-6xl mx-auto flex justify-between items-center">
+    <h1 class="text-2xl font-bold">Tap2Send – WhatsApp Connect</h1>
+    <button onclick="logout()" class="bg-white text-[var(--blue)] px-4 py-2 rounded-xl font-bold">Logout</button>
+  </div>
+</nav>
+
+<div class="max-w-3xl mx-auto p-6">
+
+  <!-- STEP 1 -->
+  <div id="step1" class="bg-white shadow-xl p-8 rounded-2xl mt-10">
+    <h2 class="text-3xl font-bold text-[var(--blue)] mb-4">Connect with Meta</h2>
+    <p class="text-gray-600 mb-6">Login using Meta to connect your WhatsApp Cloud API.</p>
+
+    <button onclick="startOAuth()" class="btn w-full py-3 rounded-xl font-bold text-lg">
+      Continue with Meta
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading" class="hidden bg-white p-8 rounded-2xl shadow-xl mt-8 text-center">
+    <div class="spinner mx-auto mb-4"></div>
+    <h3 class="text-xl font-bold text-gray-700">Connecting…</h3>
+    <p class="text-gray-500">Fetching WhatsApp details…</p>
+  </div>
+
+  <!-- DETAILS -->
+  <div id="details" class="hidden bg-white p-8 rounded-2xl shadow-xl mt-8">
+    <h2 class="text-2xl font-bold text-[var(--green)] mb-4">Connected Successfully 🎉</h2>
+
+    <p><strong>WABA ID:</strong> <span id="wabaId"></span></p>
+    <p><strong>Phone Number:</strong> <span id="phoneNumber"></span></p>
+    <p><strong>Phone ID:</strong> <span id="phoneId"></span></p>
+    <p><strong>Name:</strong> <span id="userName"></span></p>
+    <p><strong>Email:</strong> <span id="userEmail"></span></p>
+
+    <button onclick="saveToFirebase()" class="btn w-full mt-6 py-3 rounded-xl font-bold">
+      Save & Complete Setup
+    </button>
+
+    <p id="saveMsg" class="text-center mt-3 font-semibold"></p>
+  </div>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey:"AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain:"tap2send-8e72d.firebaseapp.com",
+  projectId:"tap2send-8e72d",
+  storageBucket:"tap2send-8e72d.firebasestorage.app",
+  messagingSenderId:"572191430506",
+  appId:"1:572191430506:web:3100a351c4be63fbf6b713"
+};
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+
+auth.onAuthStateChanged(u=>{
+  if(!u) return location.href="login.html";
+  currentUser = u;
+});
+
+// Utility
+const getParam = k => new URLSearchParams(location.search).get(k);
+
+// Start OAuth
+function startOAuth(){
+  const appId = "2623916141313290"; // YOUR REAL APP ID
+  const redirect = location.origin + "/connect-whatsapp.html";
+
+  const url =
+    `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}` +
+    `&redirect_uri=${encodeURIComponent(redirect)}` +
+    `&scope=whatsapp_business_management,whatsapp_business_messaging,email,public_profile`;
+
+  location.href = url;
+}
+
+// On Load
+window.onload = async () => {
+  const code = getParam("code");
+  if(!code) return;
+
+  document.getElementById("step1").classList.add("hidden");
+  document.getElementById("loading").classList.remove("hidden");
+
+  try {
+    const token = await exchangeCode(code);
+    const details = await fetchDetails(token);
+
+    window.WA = details;
+
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("details").classList.remove("hidden");
+
+    document.getElementById("wabaId").innerText = details.wabaId;
+    document.getElementById("phoneId").innerText = details.phoneId;
+    document.getElementById("phoneNumber").innerText = details.phoneNumber;
+    document.getElementById("userName").innerText = details.userName;
+    document.getElementById("userEmail").innerText = details.userEmail;
+
+  } catch(e) {
+    alert("Error: "+e.message);
+    location.href = "connect-whatsapp.html";
+  }
+};
+
+// Exchange Code → Token
+async function exchangeCode(code){
+  const res = await fetch("https://basex.onrender.com/api/exchange-token",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({code})
+  });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.error||"Token error");
+  return data.access_token;
+}
+
+// Fetch WhatsApp Details
+async function fetchDetails(token){
+  const me = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,email&access_token=${token}`);
+  const user = await me.json();
+
+  const w = await fetch(`https://graph.facebook.com/v19.0/${user.id}/owned_whatsapp_business_accounts?access_token=${token}`);
+  const waba = await w.json();
+  const wabaId = waba.data[0].id;
+
+  const p = await fetch(`https://graph.facebook.com/v19.0/${wabaId}/phone_numbers?access_token=${token}`);
+  const ph = await p.json();
+  const phone = ph.data[0];
+
+  return {
+    token,
+    userName: user.name,
+    userEmail: user.email,
+    wabaId,
+    phoneId: phone.id,
+    phoneNumber: phone.display_phone_number,
+    expiry: new Date(Date.now() + 60*24*60*60*1000).toISOString()
+  };
+}
+
+// Save To Firebase
+async function saveToFirebase(){
+  await db.collection("users").doc(currentUser.uid).update({
+    whatsappConnected: true,
+    whatsappData: window.WA
+  });
+
+  document.getElementById("saveMsg").innerText = "Saved! Redirecting…";
+  setTimeout(()=> location.href="dashboard.html", 900);
+}
+
+function logout(){ auth.signOut() }
+</script>
+
+</body>
+</html>
