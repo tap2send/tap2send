@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bulk Sender – Tap2Send</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+:root {
+  --green:#0C7A43;
+  --gold:#D4AF37;
+  --blue:#1E3A8A;
+}
+.bg-anim {
+  background: linear-gradient(135deg,var(--blue),var(--green));
+  background-size:300% 300%;
+  animation:move 10s infinite alternate;
+}
+@keyframes move { 0%{background-position:left} 100%{background-position:right} }
+.glow-btn {
+  background:var(--green);
+  border:2px solid var(--gold);
+  transition:.2s;
+}
+.glow-btn:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 20px rgba(212,175,55,.5);
+}
+.progress-bar {
+  height:8px;
+  background:var(--green);
+  border-radius:20px;
+  transition:width .3s;
+}
+</style>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- NAVBAR -->
+<nav class="bg-anim text-white p-4 shadow-xl">
+  <div class="max-w-6xl mx-auto flex justify-between">
+    <h1 class="text-2xl font-bold">Bulk Message Sender</h1>
+    <button onclick="logout()" class="px-4 py-2 bg-white text-[var(--blue)] rounded-xl font-bold">Logout</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="max-w-4xl mx-auto p-6">
+
+  <h2 class="text-3xl font-bold text-[var(--blue)] mb-6">Send Unlimited Bulk Messages</h2>
+
+  <!-- WHATSAPP WARNING -->
+  <div id="waStatus" class="hidden p-4 mb-6 bg-red-100 text-red-700 rounded-xl font-semibold"></div>
+
+  <!-- MESSAGE INPUT -->
+  <div class="bg-white shadow-xl p-6 rounded-2xl mb-8">
+    
+    <label class="font-semibold text-gray-700">Your Message</label>
+    <textarea id="message" rows="4"
+    class="w-full border p-3 mt-2 rounded-xl focus:ring-2 focus:ring-[var(--green)]"
+    placeholder="Enter your message here..."></textarea>
+
+    <label class="block mt-6 font-semibold text-gray-700">Upload CSV (phone numbers)</label>
+    <input type="file" id="csv" accept=".csv"
+      class="mt-2 w-full border p-3 rounded-xl">
+
+    <button onclick="startBulk()"
+      class="glow-btn text-white w-full py-3 mt-6 rounded-xl font-bold text-lg">
+      Start Sending
+    </button>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="progressBox" class="hidden bg-white p-6 rounded-2xl shadow-xl">
+    <h3 class="font-bold text-[var(--green)] mb-4">Sending Progress</h3>
+    <div class="w-full bg-gray-200 rounded-xl mb-3">
+      <div id="progressBar" class="progress-bar w-0"></div>
+    </div>
+    <p id="progressText" class="font-semibold text-gray-700"></p>
+  </div>
+
+  <!-- RESULT SECTION -->
+  <div id="resultBox" class="hidden bg-white p-6 rounded-2xl shadow-xl mt-6">
+    <h3 class="font-bold text-[var(--blue)] mb-4">Results</h3>
+
+    <p><strong>Success:</strong> <span id="rSuccess">0</span></p>
+    <p><strong>Failed:</strong> <span id="rFailed">0</span></p>
+    <p><strong>Total:</strong> <span id="rTotal">0</span></p>
+  </div>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<script>
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey:"AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain:"tap2send-8e72d.firebaseapp.com",
+  projectId:"tap2send-8e72d",
+  storageBucket:"tap2send-8e72d.firebasestorage.app",
+  messagingSenderId:"572191430506",
+  appId:"1:572191430506:web:3100a351c4be63fbf6b713"
+};
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let UID = null;
+let whatsapp = null;
+
+// LOGIN CHECK
+auth.onAuthStateChanged(async user=>{
+  if(!user) return location.href="login.html";
+  UID = user.uid;
+
+  const snap = await db.collection("users").doc(UID).get();
+  whatsapp = snap.data().whatsappData;
+
+  if(!whatsapp){
+    document.getElementById("waStatus").classList.remove("hidden");
+    document.getElementById("waStatus").innerText =
+      "❌ WhatsApp API is not connected. Connect it in dashboard.";
+  }
+});
+
+
+// START BULK SEND
+async function startBulk(){
+  if(!whatsapp){
+    return alert("Connect WhatsApp API first!");
+  }
+
+  const msg = document.getElementById("message").value;
+  const file = document.getElementById("csv").files[0];
+
+  if(!msg || !file) return alert("Message + CSV required!");
+
+  const numbers = await readCSV(file); // list of numbers
+  const total = numbers.length;
+
+  document.getElementById("progressBox").classList.remove("hidden");
+  document.getElementById("resultBox").classList.remove("hidden");
+
+  let success = 0;
+  let failed = 0;
+
+  // BATCH SENDING
+  for(let i=0; i<numbers.length; i++){
+    
+    const n = numbers[i];
+
+    const ok = await sendMessage(n, msg);
+
+    if(ok) success++;
+    else failed++;
+
+    const done = i+1;
+    const percent = Math.floor((done / total) * 100);
+
+    document.getElementById("progressBar").style.width = percent + "%";
+    document.getElementById("progressText").innerText =
+      `Sent ${done}/${total} messages`;
+    
+    document.getElementById("rSuccess").innerText = success;
+    document.getElementById("rFailed").innerText = failed;
+    document.getElementById("rTotal").innerText = total;
+  }
+
+  // SAVE HISTORY
+  await db.collection("users").doc(UID).collection("history").add({
+    success,
+    failed,
+    total,
+    time: new Date(),
+    message: msg
+  });
+
+  alert("Bulk sending completed!");
+}
+
+
+// SEND SINGLE API MESSAGE
+async function sendMessage(to, text){
+  try{
+    const res = await fetch(
+      `https://graph.facebook.com/v19.0/${whatsapp.phoneId}/messages`,
+      {
+        method:"POST",
+        headers:{
+          "Authorization":"Bearer "+whatsapp.token,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          messaging_product:"whatsapp",
+          to,
+          type:"text",
+          text:{ body:text }
+        })
+      }
+    );
+
+    const json = await res.json();
+
+    if(res.ok) return true;
+    return false;
+  }
+  catch(e){
+    return false;
+  }
+}
+
+
+// READ CSV NUMBERS
+function readCSV(file){
+  return new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      const lines = e.target.result.split("\n");
+      const cleaned = lines.map(x=>x.trim()).filter(x=>x);
+      resolve(cleaned);
+    };
+    reader.readAsText(file);
+  });
+}
+
+
+// LOGOUT
+function logout(){
+  auth.signOut();
+}
+</script>
+
+</body>
+</html>
