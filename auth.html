@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap2Send • Login</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+:root {
+    --green: #0C7A43;
+    --gold: #D4AF37;
+    --blue: #1E3A8A;
+    --white: #FFFFFF;
+}
+
+/* Cinematic Background */
+body {
+    background: radial-gradient(circle at 20% 20%, rgba(12,122,67,0.3), transparent),
+                radial-gradient(circle at 80% 80%, rgba(30,58,138,0.3), transparent),
+                #000;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Floating lights */
+.light {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: var(--green);
+    filter: blur(150px);
+    opacity: 0.4;
+    animation: float 8s infinite alternate;
+}
+
+.light2 {
+    background: var(--blue);
+    right: 0;
+    animation-delay: 2s;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px) translateX(0px); }
+    100% { transform: translateY(-60px) translateX(60px); }
+}
+
+/* Card Animation */
+.card {
+    animation: fadeUp 1s ease-out forwards;
+    transform: translateY(40px);
+    opacity: 0;
+}
+
+@keyframes fadeUp {
+    to {
+        transform: translateY(0px);
+        opacity: 1;
+    }
+}
+
+.input-box {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+}
+</style>
+</head>
+<body>
+
+<div class="light"></div>
+<div class="light light2"></div>
+
+<!-- Center Container -->
+<div class="flex justify-center items-center h-full relative z-10">
+
+    <div class="card w-[90%] max-w-md bg-white/10 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/20">
+
+        <h1 class="text-center text-4xl font-bold text-white mb-2">
+            Tap<span class="text-green-300">2</span>Send
+        </h1>
+
+        <p class="text-center text-gray-300 mb-8">
+            WhatsApp Cloud API Automated Platform
+        </p>
+
+        <!-- Inputs -->
+        <div class="space-y-4">
+            <input id="email" type="email"
+                placeholder="Email"
+                class="input-box w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-400 outline-none">
+
+            <input id="password" type="password"
+                placeholder="Password"
+                class="input-box w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none">
+        </div>
+
+        <!-- Buttons -->
+        <button onclick="login()"
+            class="w-full mt-6 py-3 rounded-xl text-white font-semibold text-lg
+            bg-gradient-to-r from-green-600 to-blue-700 hover:scale-[1.03] transition-all duration-300 shadow-lg">
+            Login
+        </button>
+
+        <p class="text-center text-gray-300 mt-4">or</p>
+
+        <button onclick="signup()"
+            class="w-full mt-2 py-3 rounded-xl text-black font-semibold text-lg
+            bg-gradient-to-r from-yellow-300 to-yellow-500 hover:scale-[1.03] transition-all duration-300 shadow-lg">
+            Create Account
+        </button>
+
+        <p id="message" class="text-center text-red-300 mt-4 hidden"></p>
+
+    </div>
+</div>
+
+<script type="module">
+import { auth } from "./assets/js/firebase-config.js";
+import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+
+const msg = document.getElementById("message");
+
+function showMessage(text) {
+    msg.textContent = text;
+    msg.classList.remove("hidden");
+}
+
+window.login = async function() {
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("password").value;
+
+    try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        window.location.href = "dashboard.html";
+    } catch(e) {
+        showMessage(e.message);
+    }
+}
+
+window.signup = async function() {
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("password").value;
+
+    try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        window.location.href = "dashboard.html";
+    } catch(e) {
+        showMessage(e.message);
+    }
+}
+</script>
+
+</body>
+</html>
