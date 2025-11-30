@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap2Send Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --green: #0C7A43;
+            --gold: #D4AF37;
+            --blue: #1E3A8A;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--green), var(--blue));
+        }
+    </style>
+</head>
+
+<body class="min-h-screen gradient-bg flex justify-center items-center p-6">
+
+    <div class="bg-white shadow-2xl p-10 rounded-3xl w-full max-w-md">
+
+        <!-- Toggle -->
+        <div class="flex justify-between mb-6">
+            <button id="loginTab" onclick="showLogin()" class="text-xl font-bold text-gray-400">Login</button>
+            <button id="signupTab" onclick="showSignup()" class="text-xl font-bold text-green-700">Signup</button>
+        </div>
+
+        <!-- SIGNUP -->
+        <div id="signupSection">
+            <h2 class="text-3xl font-bold text-center text-green-700 mb-8">Create Account</h2>
+
+            <input id="name" type="text" placeholder="Full Name"
+                class="w-full mb-3 p-3 border rounded-lg">
+            <input id="phone" type="text" placeholder="Phone Number"
+                class="w-full mb-3 p-3 border rounded-lg">
+            <input id="email" type="email" placeholder="Email"
+                class="w-full mb-3 p-3 border rounded-lg">
+            <input id="password" type="password" placeholder="Password"
+                class="w-full mb-5 p-3 border rounded-lg">
+
+            <button onclick="signup()"
+                class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">
+                Create Account
+            </button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="loginSection" class="hidden">
+            <h2 class="text-3xl font-bold text-center text-blue-700 mb-8">Welcome Back</h2>
+
+            <input id="loginEmail" type="email" placeholder="Email"
+                class="w-full mb-3 p-3 border rounded-lg">
+            <input id="loginPassword" type="password" placeholder="Password"
+                class="w-full mb-5 p-3 border rounded-lg">
+
+            <button onclick="login()"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">
+                Login
+            </button>
+        </div>
+
+        <p id="msg" class="text-center mt-4 text-red-600"></p>
+    </div>
+
+    <script>
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+            authDomain: "tap2send-8e72d.firebaseapp.com",
+            projectId: "tap2send-8e72d",
+            storageBucket: "tap2send-8e72d.firebasestorage.app",
+            messagingSenderId: "572191430506",
+            appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        function showSignup(){
+            signupSection.classList.remove("hidden");
+            loginSection.classList.add("hidden");
+            signupTab.classList.add("text-green-700");
+            loginTab.classList.remove("text-green-700");
+        }
+
+        function showLogin(){
+            loginSection.classList.remove("hidden");
+            signupSection.classList.add("hidden");
+            loginTab.classList.add("text-blue-700");
+            signupTab.classList.remove("text-green-700");
+        }
+
+        // SIGNUP FUNCTION
+        async function signup(){
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+            const email = document.getElementById("email").value;
+            const pass = document.getElementById("password").value;
+
+            try {
+                const user = await auth.createUserWithEmailAndPassword(email, pass);
+
+                await db.collection("users").doc(user.user.uid).set({
+                    name, phone, email, createdAt: new Date()
+                });
+
+                window.location.href = "dashboard.html";
+
+            } catch (e) {
+                msg.innerText = e.message;
+            }
+        }
+
+        // LOGIN FUNCTION
+        async function login(){
+            const email = loginEmail.value;
+            const pass = loginPassword.value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, pass);
+                window.location.href = "dashboard.html";
+            } catch (e) {
+                msg.innerText = e.message;
+            }
+        }
+    </script>
+
+</body>
+</html>
