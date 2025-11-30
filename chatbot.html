@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap2Send — Chatbot Builder</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<style>
+:root {
+    --madina-green: #0C7A43;
+    --blue: #1E3A8A;
+    --golden: #D4AF37;
+    --white: #ffffff;
+}
+.card {
+    @apply bg-white rounded-2xl shadow-xl p-6 mb-6;
+}
+.node {
+    @apply bg-gray-50 border border-gray-300 rounded-xl p-4 mb-3 cursor-move shadow-sm;
+}
+.node:hover {
+    @apply border-[var(--madina-green)] shadow-md;
+}
+</style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+<!-- NAVBAR -->
+<nav class="bg-white shadow-lg sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+    <div class="text-2xl font-bold text-[var(--madina-green)]">Tap2Send — Chatbot</div>
+    <div class="space-x-6 hidden md:block">
+        <a href="dashboard.html" class="hover:text-[var(--madina-green)]">Dashboard</a>
+        <a href="bulk.html" class="hover:text-[var(--madina-green)]">Bulk</a>
+        <a href="templates.html" class="hover:text-[var(--madina-green)]">Templates</a>
+        <a href="automation.html" class="hover:text-[var(--madina-green)]">Automation</a>
+        <a href="chatbot.html" class="text-[var(--madina-green)] font-bold">Chatbot</a>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-7xl mx-auto p-6">
+
+<h1 class="text-4xl font-bold text-[var(--blue)] mb-8">AI Chatbot Builder 🤖</h1>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+<!-- LEFT: Node Library -->
+<div class="card">
+    <h2 class="text-xl font-semibold text-[var(--madina-green)] mb-4">Bot Blocks</h2>
+
+    <button onclick="addNode('message')" class="w-full py-3 rounded-lg bg-[var(--madina-green)] text-white mb-3 hover:bg-green-700">
+        ➕ Message Block
+    </button>
+
+    <button onclick="addNode('question')" class="w-full py-3 rounded-lg bg-[var(--blue)] text-white mb-3 hover:bg-blue-700">
+        ➕ Question Block
+    </button>
+
+    <button onclick="addNode('ai')" class="w-full py-3 rounded-lg bg-[var(--golden)] text-white mb-3 hover:bg-yellow-600">
+        🤖 AI Auto-Response
+    </button>
+
+    <button onclick="addNode('delay')" class="w-full py-3 rounded-lg bg-gray-700 text-white hover:bg-gray-900">
+        ⏳ Delay Block
+    </button>
+</div>
+
+<!-- MIDDLE: Chatbot Flow -->
+<div class="card col-span-2">
+    <h2 class="text-xl font-semibold mb-4 text-[var(--blue)]">Chatbot Flow</h2>
+
+    <div id="flowArea" class="min-h-[400px] p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50">
+        <!-- Nodes will appear here -->
+    </div>
+
+    <button id="saveFlow" class="mt-6 px-6 py-3 rounded-xl bg-[var(--madina-green)] text-white font-bold hover:bg-green-700">
+        💾 Save Chatbot
+    </button>
+</div>
+
+</div>
+
+<!-- PREVIEW SECTION -->
+<div class="card mt-10">
+<h2 class="text-2xl font-semibold text-[var(--blue)] mb-4">Chatbot Preview 📱</h2>
+
+<div id="preview" class="p-6 bg-white rounded-xl border min-h-[200px]">
+    <p class="text-gray-500">Your chatbot preview will appear here after saving.</p>
+</div>
+</div>
+
+</div>
+
+<!-- FIREBASE + JS -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain: "tap2send-8e72d.firebaseapp.com",
+  projectId: "tap2send-8e72d",
+  storageBucket: "tap2send-8e72d.firebasestorage.app",
+  messagingSenderId: "572191430506",
+  appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+
+// Load previous flow
+onAuthStateChanged(auth, async (user) => {
+    if (!user) return window.location.href = "auth.html";
+    currentUser = user;
+
+    const snap = await getDoc(doc(db, "chatbots", user.uid));
+    if (snap.exists()) {
+        loadFlow(snap.data().flow);
+    }
+});
+
+function addNode(type) {
+    const area = document.getElementById("flowArea");
+    const box = document.createElement("div");
+    box.className = "node";
+
+    box.innerHTML = `
+        <div class="flex justify-between">
+            <strong>${type.toUpperCase()} BLOCK</strong>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-red-500">✖</button>
+        </div>
+
+        ${type === "message"
+            ? '<textarea placeholder="Bot message..." class="w-full p-2 mt-2 border rounded"></textarea>'
+            : ""}
+
+        ${type === "question"
+            ? '<textarea placeholder="Ask a question..." class="w-full p-2 mt-2 border rounded"></textarea>'
+            : ""}
+
+        ${type === "ai"
+            ? '<textarea placeholder="AI auto-answer prompt..." class="w-full p-2 mt-2 border rounded"></textarea>'
+            : ""}
+
+        ${type === "delay"
+            ? '<input type="number" placeholder="Seconds..." class="w-full p-2 mt-2 border rounded" />'
+            : ""}
+    `;
+
+    area.appendChild(box);
+}
+
+window.addNode = addNode;
+
+// Sortable drag/drop
+Sortable.create(document.getElementById("flowArea"), {
+    animation: 150
+});
+
+// SAVE BOT
+document.getElementById("saveFlow").onclick = async () => {
+    const nodes = [...document.querySelectorAll(".node")].map(node => {
+        return {
+            title: node.querySelector("strong").innerText,
+            content: node.querySelector("textarea, input")?.value || ""
+        }
+    });
+
+    await setDoc(doc(db, "chatbots", currentUser.uid), {
+        flow: nodes,
+        updated: Date.now()
+    });
+
+    // Show preview
+    let html = "";
+    nodes.forEach(n => {
+        html += `<p class="p-3 mb-2 bg-gray-100 rounded-xl"><strong>${n.title}</strong><br>${n.content}</p>`;
+    });
+
+    document.getElementById("preview").innerHTML = html;
+
+    alert("Chatbot saved successfully!");
+};
+
+// Load flow on page load
+function loadFlow(data) {
+    data.forEach(block => {
+        addNode(block.title.includes("AI") ? "ai" :
+                block.title.includes("QUESTION") ? "question" :
+                block.title.includes("DELAY") ? "delay" :
+                "message");
+
+        // fill text
+        const last = document.querySelectorAll(".node textarea, .node input");
+        last[last.length - 1].value = block.content;
+    });
+}
+</script>
+
+</body>
+</html>
