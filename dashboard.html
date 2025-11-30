@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap2Send • Dashboard</title>
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+:root {
+    --green: #0C7A43;
+    --gold: #D4AF37;
+    --blue: #1E3A8A;
+}
+
+/* GLASS SIDEBAR */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: rgba(12, 122, 67, 0.85);
+    backdrop-filter: blur(12px);
+    border-right: 2px solid rgba(255, 255, 255, 0.15);
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: white;
+}
+
+.sidebar a {
+    display: block;
+    padding: 14px 22px;
+    font-size: 16px;
+    color: #fff;
+    text-decoration: none;
+    margin: 4px 0;
+    border-left: 4px solid transparent;
+    transition: 0.3s;
+}
+.sidebar a:hover {
+    background: rgba(255,255,255,0.15);
+    border-left: 4px solid var(--gold);
+}
+
+/* CONTENT */
+.content {
+    margin-left: 260px;
+    padding: 35px;
+}
+
+/* STAT CARD */
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.08);
+    transition: .3s;
+}
+.card:hover {
+    transform: translateY(-6px) scale(1.02);
+}
+
+/* HEADER ANIMATION */
+.header-anim {
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    background-size: 200% 200%;
+    animation: moveGrad 6s ease-in-out infinite;
+}
+@keyframes moveGrad {
+    0% { background-position: left top; }
+    100% { background-position: right bottom; }
+}
+</style>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h1 class="text-center text-3xl font-extrabold my-6 text-gold">Tap2Send</h1>
+
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="connect-whatsapp.html">🔗 Connect WhatsApp</a>
+    <a href="bulk.html">📩 Bulk Sender</a>
+    <a href="templates.html-part1">📚 Templates</a>
+    <a href="automation.html">🤖 Automation</a>
+    <a href="campaigns.html">📢 Campaigns</a>
+    <a href="analytics.html">📊 Analytics</a>
+    <a href="pricing.html">💰 Pricing</a>
+    <a href="billing.html">🧾 Billing</a>
+    <a href="profile.html">👤 Profile</a>
+    <a href="settings.html">⚙ Settings</a>
+    <a href="contact.html">🎧 Support</a>
+    <a href="login.html">🚪 Logout</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+    <!-- HEADER -->
+    <div class="header-anim text-white p-8 rounded-3xl shadow-xl">
+        <h2 class="text-4xl font-bold">Welcome Back 👋</h2>
+        <p class="text-lg opacity-90">Here’s your WhatsApp automation summary</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-10">
+
+        <div class="card">
+            <h3 class="text-gray-600 font-semibold">Messages Today</h3>
+            <p id="todayCount" class="text-4xl font-extrabold text-green-700">0</p>
+        </div>
+
+        <div class="card">
+            <h3 class="text-gray-600 font-semibold">Total Messages</h3>
+            <p id="totalCount" class="text-4xl font-extrabold text-blue-700">0</p>
+        </div>
+
+        <div class="card">
+            <h3 class="text-gray-600 font-semibold">Active Templates</h3>
+            <p id="templatesCount" class="text-4xl font-extrabold text-yellow-600">0</p>
+        </div>
+
+        <div class="card">
+            <h3 class="text-gray-600 font-semibold">Subscribers</h3>
+            <p id="subsCount" class="text-4xl font-extrabold text-green-900">0</p>
+        </div>
+    </div>
+
+    <!-- TOKEN BOX -->
+    <div class="mt-10 bg-yellow-100 p-6 rounded-xl border-l-8 border-yellow-400 shadow">
+        <h4 class="text-xl font-bold text-yellow-800">⚠ Token Expiry Alert</h4>
+        <p>Your WhatsApp API token will expire in <span id="expiryDays" class="font-bold">30</span> days.</p>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="mt-12">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Quick Actions</h2>
+
+        <div class="flex gap-4 flex-wrap">
+            <a href="bulk.html" class="px-6 py-3 bg-green-700 text-white rounded-xl shadow hover:bg-green-800">Send Bulk</a>
+            <a href="automation.html" class="px-6 py-3 bg-blue-700 text-white rounded-xl shadow hover:bg-blue-800">Create Automation</a>
+            <a href="templates.html-part1" class="px-6 py-3 bg-yellow-500 text-black rounded-xl shadow hover:bg-yellow-600">Create Template</a>
+        </div>
+    </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+import firebaseConfig from "./firebase-config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore();
+
+// LOAD USER DASHBOARD
+async function loadDashboard() {
+    let uid = localStorage.getItem("tap2send_user");
+    if (!uid) return;
+
+    let snap = await getDoc(doc(db, "users", uid));
+    if (!snap.exists()) return;
+
+    let data = snap.data();
+
+    document.getElementById("todayCount").innerText = data.today || 0;
+    document.getElementById("totalCount").innerText = data.total || 0;
+    document.getElementById("templatesCount").innerText = data.templates || 0;
+    document.getElementById("subsCount").innerText = data.subscribers || 0;
+    document.getElementById("expiryDays").innerText = data.token_expiry || 30;
+}
+
+loadDashboard();
+</script>
+
+</body>
+</html>
