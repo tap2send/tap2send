@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tap2Send — Analytics</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+    --madina-green: #0C7A43;
+    --golden: #D4AF37;
+    --blue: #1E3A8A;
+    --white: #ffffff;
+}
+.card {
+    @apply bg-white rounded-2xl shadow-xl p-6 transition-all hover:scale-[1.01];
+}
+</style>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- NAVBAR -->
+<nav class="bg-white shadow-lg sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 flex justify-between h-16 items-center">
+    <div class="text-2xl font-bold text-[var(--madina-green)]">Tap2Send Analytics</div>
+    <div class="space-x-6 hidden md:flex">
+      <a href="dashboard.html" class="hover:text-[var(--madina-green)]">Dashboard</a>
+      <a href="bulk.html" class="hover:text-[var(--madina-green)]">Bulk</a>
+      <a href="templates.html" class="hover:text-[var(--madina-green)]">Templates</a>
+      <a href="analytics.html" class="text-[var(--madina-green)] font-bold">Analytics</a>
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="max-w-7xl mx-auto p-6">
+
+<h1 class="text-4xl font-bold text-[var(--blue)] mb-8">Your Performance Analytics 📊</h1>
+
+<!-- STATS GRID -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+
+<div class="card">
+  <h3 class="text-gray-500 text-sm">Total Messages Sent</h3>
+  <p id="statMessages" class="text-3xl font-bold text-[var(--madina-green)]">0</p>
+</div>
+
+<div class="card">
+  <h3 class="text-gray-500 text-sm">Campaigns</h3>
+  <p id="statCampaigns" class="text-3xl font-bold text-[var(--blue)]">0</p>
+</div>
+
+<div class="card">
+  <h3 class="text-gray-500 text-sm">Templates Used</h3>
+  <p id="statTemplates" class="text-3xl font-bold text-[var(--golden)]">0</p>
+</div>
+
+<div class="card">
+  <h3 class="text-gray-500 text-sm">Active Automations</h3>
+  <p id="statAuto" class="text-3xl font-bold text-green-600">0</p>
+</div>
+
+</div>
+
+<!-- GRAPH GRID -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+<div class="card">
+  <h2 class="text-xl font-semibold mb-3">Messages Sent — Last 30 days</h2>
+  <canvas id="chartMessages"></canvas>
+</div>
+
+<div class="card">
+  <h2 class="text-xl font-semibold mb-3">Campaigns Created</h2>
+  <canvas id="chartCampaigns"></canvas>
+</div>
+
+<div class="card">
+  <h2 class="text-xl font-semibold mb-3">Templates Usage</h2>
+  <canvas id="chartTemplates"></canvas>
+</div>
+
+<div class="card">
+  <h2 class="text-xl font-semibold mb-3">Automation Activity</h2>
+  <canvas id="chartAutomation"></canvas>
+</div>
+
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-white py-6 mt-12">
+  <div class="text-center text-sm">
+    Tap2Send © 2025 — Professional WhatsApp Automation Platform
+  </div>
+</footer>
+
+
+<!-- FIREBASE + ANALYTICS SCRIPT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain: "tap2send-8e72d.firebaseapp.com",
+  projectId: "tap2send-8e72d",
+  storageBucket: "tap2send-8e72d.firebasestorage.app",
+  messagingSenderId: "572191430506",
+  appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) return (window.location.href = "auth.html");
+
+    const snap = await getDoc(doc(db, "analytics", user.uid));
+    const data = snap.exists() ? snap.data() : {
+      messages: 0,
+      campaigns: 0,
+      templates: 0,
+      automations: 0
+    };
+
+    document.getElementById("statMessages").textContent = data.messages;
+    document.getElementById("statCampaigns").textContent = data.campaigns;
+    document.getElementById("statTemplates").textContent = data.templates;
+    document.getElementById("statAuto").textContent = data.automations;
+
+    loadCharts(data);
+});
+
+
+function loadCharts(data) {
+  const labels = Array.from({length: 30}, (_, i) => `Day ${i+1}`);
+
+  new Chart(document.getElementById("chartMessages"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Messages",
+        data: random(data.messages),
+        borderWidth: 2
+      }]
+    }
+  });
+
+  new Chart(document.getElementById("chartCampaigns"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Campaigns",
+        data: random(data.campaigns),
+      }]
+    }
+  });
+
+  new Chart(document.getElementById("chartTemplates"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Templates",
+        data: random(data.templates),
+      }]
+    }
+  });
+
+  new Chart(document.getElementById("chartAutomation"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Automation",
+        data: random(data.automations),
+      }]
+    }
+  });
+}
+
+function random(max) {
+  return Array.from({length: 30}, ()=> Math.floor(Math.random()*max));
+}
+
+</script>
+
+</body>
+</html>
