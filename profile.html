@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tap2Send • Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --green:#0C7A43;
+      --gold:#D4AF37;
+      --blue:#1E3A8A;
+      --white:#fff;
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .fade { animation: fade .5s ease-in-out; }
+    @keyframes fade {
+      from {opacity:0; transform:translateY(8px);}
+      to {opacity:1; transform:translateY(0);}
+    }
+
+    .hover-scale { transition:.3s; }
+    .hover-scale:hover { transform:scale(1.03); }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen fade">
+
+<!-- NAVBAR -->
+<div class="bg-white shadow-lg p-4 flex justify-between items-center sticky top-0 z-50">
+  <div class="text-3xl font-bold text-[var(--green)]">Tap2Send</div>
+
+  <div class="hidden md:flex gap-6 text-gray-700">
+    <a href="dashboard.html" class="hover:text-[var(--green)]">Dashboard</a>
+    <a href="profile.html" class="text-[var(--green)] border-b-2 border-[var(--green)]">Profile</a>
+    <button class="hover:text-[var(--green)]" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="max-w-3xl mx-auto text-center mt-10">
+  <h1 class="text-4xl font-bold text-[var(--blue)]">Your Profile</h1>
+  <p class="text-gray-600 mt-2">Manage your personal details, security and API settings</p>
+</div>
+
+<!-- MAIN CARD -->
+<div class="max-w-3xl mx-auto glass p-8 rounded-2xl shadow-xl mt-10 fade">
+
+  <!-- USER BASIC INFO -->
+  <h2 class="text-2xl font-semibold text-[var(--green)]">Personal Information</h2>
+
+  <div class="mt-5 grid gap-4">
+
+    <div>
+      <label class="font-semibold text-sm text-gray-700">Full Name</label>
+      <input id="fullName" 
+        class="w-full p-3 rounded-xl border mt-1"
+        placeholder="Your Name">
+    </div>
+
+    <div>
+      <label class="font-semibold text-sm text-gray-700">Email (read-only)</label>
+      <input id="email" disabled 
+        class="w-full p-3 rounded-xl border mt-1 bg-gray-100">
+    </div>
+
+    <div>
+      <label class="font-semibold text-sm text-gray-700">Phone</label>
+      <input id="phone" 
+        class="w-full p-3 rounded-xl border mt-1"
+        placeholder="+91XXXXXXXXXX">
+    </div>
+
+    <button 
+      onclick="saveProfile()"
+      class="w-full bg-[var(--green)] text-white py-3 rounded-xl mt-4 hover:bg-[#085C34]">
+      Save Profile
+    </button>
+  </div>
+
+  
+  <!-- PASSWORD SECTION -->
+  <h2 class="text-2xl font-semibold text-[var(--green)] mt-10">Security</h2>
+
+  <div class="grid gap-4 mt-5">
+
+    <div>
+      <label class="font-semibold text-sm text-gray-700">New Password</label>
+      <input id="newPass"
+        type="password"
+        class="w-full p-3 rounded-xl border mt-1"
+        placeholder="Enter new password">
+    </div>
+
+    <button onclick="changePassword()"
+      class="w-full bg-[var(--blue)] text-white py-3 rounded-xl hover:bg-[#152c6d]">
+      Change Password
+    </button>
+
+  </div>
+
+  <!-- API SECTION -->
+  <h2 class="text-2xl font-semibold text-[var(--green)] mt-10">WhatsApp API Details</h2>
+
+  <div id="apiBox" class="mt-4 bg-white border rounded-xl p-4">
+    Loading...
+  </div>
+
+  <!-- DELETE ACCOUNT -->
+  <button onclick="deleteAccount()"
+    class="mt-10 w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700">
+    Delete My Account
+  </button>
+
+</div>
+
+<!-- FOOTER -->
+<div class="text-center text-xs text-gray-600 mt-20 mb-6">
+  © 2025 Tap2Send • Profile System
+</div>
+
+<script>
+// -------------------------------
+// FIREBASE INIT
+// -------------------------------
+const firebaseConfig = {
+  apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain: "tap2send-8e72d.firebaseapp.com",
+  projectId: "tap2send-8e72d",
+  storageBucket: "tap2send-8e72d.firebasestorage.app",
+  messagingSenderId: "572191430506",
+  appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+
+// -------------------------------
+// CHECK LOGIN
+// -------------------------------
+auth.onAuthStateChanged(async (user)=>{
+  if(!user) return window.location.href="login.html";
+  currentUser = user;
+
+  document.getElementById("email").value = user.email;
+
+  // Load data
+  const doc = await db.collection("users").doc(user.uid).get();
+  if(doc.exists){
+    const data = doc.data();
+    document.getElementById("fullName").value = data.name || "";
+    document.getElementById("phone").value = data.phone || "";
+
+    loadAPI();
+  }
+});
+
+// -------------------------------
+// SAVE PROFILE
+// -------------------------------
+async function saveProfile(){
+  await db.collection("users").doc(currentUser.uid).update({
+    name: document.getElementById("fullName").value,
+    phone: document.getElementById("phone").value
+  });
+
+  alert("Profile Updated Successfully!");
+}
+
+// -------------------------------
+// CHANGE PASSWORD
+// -------------------------------
+async function changePassword(){
+  let pass = document.getElementById("newPass").value;
+
+  if(pass.length < 6){
+    alert("Password must be at least 6 characters");
+    return;
+  }
+
+  try {
+    await currentUser.updatePassword(pass);
+    alert("Password Updated!");
+  } catch(e){
+    alert("Re-login required. Please logout and login again.");
+  }
+}
+
+// -------------------------------
+// LOAD API DATA
+// -------------------------------
+async function loadAPI(){
+  const doc = await db.collection("whatsappAccounts").doc(currentUser.uid).get();
+
+  if(!doc.exists){
+    document.getElementById("apiBox").innerHTML =
+      `<p>No WhatsApp API connected.</p>
+       <a href='connect-whatsapp.html' class='text-[var(--blue)] underline'>
+         Connect Now
+       </a>`;
+    return;
+  }
+
+  const d = doc.data();
+  document.getElementById("apiBox").innerHTML = `
+      <p><strong>WABA ID:</strong> ${d.wabaId}</p>
+      <p><strong>Phone ID:</strong> ${d.phoneId}</p>
+      <p><strong>Phone Number:</strong> ${d.phoneNumber}</p>
+      <p><strong>Token:</strong> ${d.token.slice(0,25)}....</p>
+      <p><strong>Connected on:</strong> ${d.connected_at}</p>
+  `;
+}
+
+// -------------------------------
+// DELETE ACCOUNT
+// -------------------------------
+async function deleteAccount(){
+  if(!confirm("Are you sure? This will delete everything.")) return;
+
+  await db.collection("users").doc(currentUser.uid).delete();
+  await db.collection("whatsappAccounts").doc(currentUser.uid).delete();
+
+  await currentUser.delete();
+
+  alert("Account deleted.");
+  window.location.href = "register.html";
+}
+
+// -------------------------------
+// LOGOUT
+// -------------------------------
+function logout(){
+  auth.signOut().then(()=> window.location.href="login.html");
+}
+</script>
+
+</body>
+</html>
