@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Automation – Tap2Send</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+:root {
+  --green:#0C7A43;
+  --gold:#D4AF37;
+  --blue:#1E3A8A;
+}
+.bg-anim {
+  background: linear-gradient(135deg, var(--blue), var(--green));
+  background-size: 300% 300%;
+  animation: move 8s infinite alternate;
+}
+@keyframes move {0%{background-position:left}100%{background-position:right}}
+.glow-btn {
+  background: var(--green);
+  border: 2px solid var(--gold);
+  color:white;
+  transition:.3s;
+}
+.glow-btn:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 15px rgba(212,175,55,.4);
+}
+.card {
+  transition:.3s;
+}
+.card:hover {
+  transform:translateY(-4px);
+  box-shadow:0 5px 15px rgba(0,0,0,.15);
+}
+</style>
+
+</head>
+<body class="bg-gray-100">
+
+<!-- NAV -->
+<nav class="bg-anim p-4 text-white shadow-lg">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Tap2Send Automations</h1>
+        <button onclick="logout()" class="bg-white text-[var(--blue)] px-4 py-2 rounded-xl font-bold">
+            Logout
+        </button>
+    </div>
+</nav>
+
+<div class="max-w-5xl mx-auto p-6">
+
+  <h2 class="text-3xl font-bold text-[var(--blue)] mb-6">Create Automation Rules ⚡</h2>
+
+  <!-- ADD RULE -->
+  <div class="card bg-white p-6 rounded-2xl mb-6 shadow-xl">
+      <h3 class="text-xl font-bold text-[var(--green)] mb-4">New Automation Rule</h3>
+
+      <label class="font-semibold">Keyword Trigger</label>
+      <input id="keyword" class="w-full p-3 border rounded-lg mb-4" placeholder="e.g. hello, price, hi">
+
+      <label class="font-semibold">Reply Message</label>
+      <textarea id="replyMsg" class="w-full p-3 border rounded-lg mb-4" rows="3" placeholder="Your auto reply message..."></textarea>
+
+      <label class="font-semibold">Delay (Seconds)</label>
+      <input id="delay" type="number" class="w-full p-3 border rounded-lg mb-4" placeholder="0 = instant reply">
+
+      <button onclick="saveRule()" class="glow-btn w-full py-3 font-bold rounded-xl">Add Rule</button>
+
+      <p id="msg" class="mt-3 font-semibold"></p>
+  </div>
+
+  <!-- EXISTING RULES -->
+  <div class="card bg-white p-6 rounded-2xl shadow-xl">
+      <h3 class="text-xl font-bold text-[var(--blue)] mb-4">Your Automation Rules</h3>
+
+      <div id="rulesList" class="space-y-4"></div>
+  </div>
+
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey:"AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain:"tap2send-8e72d.firebaseapp.com",
+  projectId:"tap2send-8e72d",
+  storageBucket:"tap2send-8e72d.firebasestorage.app",
+  messagingSenderId:"572191430506",
+  appId:"1:572191430506:web:3100a351c4be63fbf6b713"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let currentUser = null;
+
+// LOGIN CHECK
+auth.onAuthStateChanged(async u=>{
+  if(!u) return location.href="login.html";
+  currentUser = u;
+  loadRules();
+});
+
+// SAVE RULE
+async function saveRule(){
+  const keyword = document.getElementById("keyword").value.trim();
+  const replyMsg = document.getElementById("replyMsg").value.trim();
+  const delay = document.getElementById("delay").value.trim();
+  const msg = document.getElementById("msg");
+
+  if(!keyword || !replyMsg){
+    msg.innerText = "Keyword & reply required!";
+    msg.style.color = "red";
+    return;
+  }
+
+  await db.collection("users")
+          .doc(currentUser.uid)
+          .collection("automations")
+          .add({
+              keyword,
+              replyMsg,
+              delay: Number(delay||0),
+              createdAt: new Date()
+          });
+
+  msg.innerText = "Rule added!";
+  msg.style.color = "green";
+
+  document.getElementById("keyword").value = "";
+  document.getElementById("replyMsg").value = "";
+  document.getElementById("delay").value = "";
+
+  loadRules();
+}
+
+// LOAD EXISTING RULES
+async function loadRules(){
+  const rulesList = document.getElementById("rulesList");
+  rulesList.innerHTML = `<p class="text-gray-500">Loading...</p>`;
+
+  const snap = await db.collection("users")
+                       .doc(currentUser.uid)
+                       .collection("automations")
+                       .orderBy("createdAt","desc")
+                       .get();
+
+  if(snap.empty){
+    rulesList.innerHTML = `<p class="text-gray-500">No rules created yet.</p>`;
+    return;
+  }
+
+  rulesList.innerHTML = "";
+
+  snap.forEach(doc=>{
+    const d = doc.data();
+
+    rulesList.innerHTML += `
+      <div class="p-4 border rounded-xl bg-gray-50">
+        <p><strong>Keyword:</strong> ${d.keyword}</p>
+        <p><strong>Reply:</strong> ${d.replyMsg}</p>
+        <p><strong>Delay:</strong> ${d.delay} sec</p>
+        <button onclick="deleteRule('${doc.id}')" class="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg">
+          Delete
+        </button>
+      </div>
+    `;
+  });
+}
+
+// DELETE RULE
+async function deleteRule(id){
+  await db.collection("users")
+          .doc(currentUser.uid)
+          .collection("automations")
+          .doc(id)
+          .delete();
+
+  loadRules();
+}
+
+function logout(){
+  auth.signOut();
+}
+</script>
+</body>
+</html>
