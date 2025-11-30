@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tap2Send – Templates</title>
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+:root {
+    --green: #0C7A43;
+    --gold: #D4AF37;
+    --blue: #1E3A8A;
+    --white: #FFFFFF;
+}
+
+/* Cinematic Anim */
+.bg-anim {
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    background-size: 300% 300%;
+    animation: bgmove 8s infinite alternate;
+}
+@keyframes bgmove {
+    0% { background-position: left; }
+    100% { background-position: right; }
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    transition: .3s;
+    box-shadow: 0 0 20px rgba(0,0,0,0.08);
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.13);
+}
+
+.btn-main {
+    background: var(--green);
+    border: 2px solid var(--gold);
+    color: white;
+    font-weight: bold;
+    padding: 14px;
+    border-radius: 12px;
+    transition: .3s;
+}
+.btn-main:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(212,175,55,0.5);
+}
+
+.input-box {
+    width: 100%;
+    padding: 13px;
+    border-radius: 12px;
+    border: 2px solid #ddd;
+    margin-bottom: 12px;
+}
+</style>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- NAV -->
+<nav class="bg-anim p-5 text-white shadow-lg">
+  <div class="max-w-6xl mx-auto flex justify-between items-center">
+    <h1 class="text-2xl font-bold">Tap2Send Templates</h1>
+    <button onclick="logout()" class="bg-white text-[var(--blue)] px-4 py-2 rounded-xl font-bold">
+      Logout
+    </button>
+  </div>
+</nav>
+
+<div class="max-w-5xl mx-auto p-6">
+
+<h2 class="text-3xl font-bold text-[var(--blue)] mb-6">Smart WhatsApp Templates</h2>
+
+<!-- AI GENERATOR CARD -->
+<div class="card mb-6">
+  <h3 class="text-xl font-bold text-[var(--green)] mb-4">Generate with AI 🤖</h3>
+
+  <label class="font-semibold">Describe your message</label>
+  <textarea id="aiPrompt" class="input-box" rows="3"
+    placeholder="Example: Generate a welcome template with 20% discount"></textarea>
+
+  <label class="font-semibold">Template Type</label>
+  <select id="aiType" class="input-box">
+    <option value="Marketing">Marketing</option>
+    <option value="Utility">Utility</option>
+    <option value="Authentication">Authentication (OTP)</option>
+  </select>
+
+  <button onclick="generateAI()" class="btn-main w-full">Generate Template</button>
+
+  <p id="aiStatus" class="mt-3 font-semibold"></p>
+</div>
+
+<!-- TEMPLATE BUILDER -->
+<div class="card mb-6">
+  <h3 class="text-xl font-bold text-[var(--green)] mb-4">Create Template</h3>
+
+  <label class="font-semibold">Template Name</label>
+  <input id="tempName" class="input-box" placeholder="welcome_offer" />
+
+  <label class="font-semibold">Category</label>
+  <select id="tempCat" class="input-box">
+    <option value="Marketing">Marketing</option>
+    <option value="Utility">Utility</option>
+    <option value="Authentication">Authentication</option>
+  </select>
+
+  <label class="font-semibold">Header (Optional)</label>
+  <input id="tempHeader" class="input-box" placeholder="Welcome!" />
+
+  <label class="font-semibold">Body</label>
+  <textarea id="tempBody" class="input-box" rows="4"
+    placeholder="Hello {{name}}, welcome to our service..."></textarea>
+
+  <label class="font-semibold">Footer (Optional)</label>
+  <input id="tempFooter" class="input-box" placeholder="Team Tap2Send" />
+
+  <button onclick="saveTemplate()" class="btn-main w-full mt-3">Save Template</button>
+
+  <p id="saveStatus" class="mt-3 font-semibold"></p>
+</div>
+
+<!-- TEMPLATE LIST -->
+<div class="card mb-6">
+  <h3 class="text-xl font-bold text-[var(--blue)] mb-4">Your Templates</h3>
+
+  <div id="templatesList" class="space-y-4">
+    <!-- Filled by JS -->
+  </div>
+</div>
