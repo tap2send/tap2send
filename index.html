@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tap2Send – WhatsApp Automation Platform</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #f5f6fa;
+  overflow-x: hidden;
+}
+
+/* NAVBAR */
+.navbar {
+  width: 100%;
+  background: #003d2e;
+  padding: 20px 40px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar h1 {
+  margin: 0;
+  color: #ffd700;
+}
+
+.navbar a {
+  color: #fff;
+  margin-left: 20px;
+  text-decoration: none;
+  font-size: 16px;
+  transition: .3s;
+}
+
+.navbar a:hover {
+  color: #ffd700;
+}
+
+/* HERO SECTION */
+.hero {
+  padding: 80px 40px;
+  text-align: center;
+  background: linear-gradient(135deg, #003d2e, #007bff);
+  color: white;
+}
+
+.hero h2 {
+  font-size: 42px;
+  margin-bottom: 15px;
+}
+
+.hero p {
+  font-size: 20px;
+  margin-bottom: 25px;
+}
+
+.btn {
+  padding: 15px 28px;
+  background: #ffd700;
+  color: black;
+  font-weight: bold;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 18px;
+  transition: .3s;
+}
+
+.btn:hover {
+  background: white;
+}
+
+/* FEATURES */
+.features {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+  padding: 50px;
+}
+
+.feature-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,.08);
+  transition: .3s;
+}
+
+.feature-box i {
+  font-size: 40px;
+  color: #003d2e;
+  margin-bottom: 15px;
+}
+
+.feature-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.12);
+}
+
+/* FOOTER */
+footer {
+  background: #003d2e;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  margin-top: 40px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <h1>Tap2Send</h1>
+  <div>
+    <a href="index.html">Home</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="contact.html">Support</a>
+    <a href="login.html" id="loginBtn">Login</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h2>Automate, Scale & Grow With WhatsApp</h2>
+  <p>Send unlimited WhatsApp messages, create automations, templates, campaigns & more.</p>
+  <a href="signup.html" class="btn">Get Started Free</a>
+</div>
+
+<!-- FEATURES GRID -->
+<div class="features">
+  
+  <div class="feature-box">
+    <i class="fa fa-paper-plane"></i>
+    <h3>Bulk Messaging</h3>
+    <p>Send thousands of messages instantly with 0 lag.</p>
+  </div>
+
+  <div class="feature-box">
+    <i class="fa fa-robot"></i>
+    <h3>Automation</h3>
+    <p>Auto reply, welcome flows, sequence messages.</p>
+  </div>
+
+  <div class="feature-box">
+    <i class="fa fa-book"></i>
+    <h3>Smart Templates</h3>
+    <p>Create, store & reuse message templates effortlessly.</p>
+  </div>
+
+  <div class="feature-box">
+    <i class="fa fa-chart-line"></i>
+    <h3>Analytics</h3>
+    <p>Track message delivery, performance & conversions.</p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  © 2025 Tap2Send • All Rights Reserved.
+</footer>
+
+<script type="module">
+import firebaseConfig from "./firebase-config.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+
+// Auto redirect
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    window.location.href = "dashboard.html";  
+  }
+});
+</script>
+
+</body>
+</html>
