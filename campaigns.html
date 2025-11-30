@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Tap2Send • Campaigns</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<style>
+:root {
+  --green: #0C7A43;
+  --gold: #D4AF37;
+  --blue: #1E3A8A;
+  --white: #ffffff;
+}
+
+.fade { animation: fade .5s ease-in-out; }
+@keyframes fade { from{opacity:0;} to{opacity:1;} }
+
+.glass {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.hover-scale { transition:.3s; }
+.hover-scale:hover { transform:scale(1.02); }
+
+</style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen fade">
+
+<!-- NAV -->
+<div class="bg-white shadow-lg p-4 flex justify-between items-center">
+  <div class="text-2xl font-bold text-[var(--green)]">Tap2Send</div>
+  <div class="flex gap-6">
+    <a href="dashboard.html" class="text-gray-700 hover:text-[var(--green)]">Dashboard</a>
+    <a href="bulk.html" class="text-gray-700 hover:text-[var(--green)]">Bulk Sender</a>
+    <a href="templates.html" class="text-gray-700 hover:text-[var(--green)]">Templates</a>
+    <a href="automation.html" class="text-gray-700 hover:text-[var(--green)]">Automation</a>
+    <a href="#" class="text-[var(--green)] font-semibold border-b-2 border-[var(--green)]">Campaigns</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="max-w-5xl mx-auto mt-10 text-center">
+  <h1 class="text-4xl font-bold text-[var(--blue)]">Campaigns 📢</h1>
+  <p class="text-gray-600 text-lg mt-2">Create, schedule and send powerful marketing blasts.</p>
+</div>
+
+<!-- CREATE CAMPAIGN BUTTON -->
+<div class="max-w-5xl mx-auto mt-8 text-right">
+  <button onclick="openCreate()" class="bg-[var(--green)] text-white px-6 py-3 rounded-xl shadow-lg hover-scale">
+    + Create Campaign
+  </button>
+</div>
+
+<!-- CAMPAIGN LIST -->
+<div id="campaignList" class="max-w-5xl mx-auto mt-6 grid grid-cols-1 gap-5">
+  <!-- Filled automatically -->
+</div>
+
+<!-- CREATE MODAL -->
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center fade">
+  <div class="bg-white w-[95%] max-w-2xl p-6 rounded-2xl shadow-xl">
+    <h2 class="text-2xl font-bold text-[var(--blue)] mb-4">New Campaign</h2>
+
+    <label class="font-semibold">Campaign Name</label>
+    <input id="campName" class="w-full p-3 border rounded-xl mb-4" placeholder="E.g. Diwali Promo" />
+
+    <label class="font-semibold">Message</label>
+    <textarea id="campMsg" class="w-full p-3 border rounded-xl mb-4" rows="4" placeholder="Your message..."></textarea>
+
+    <label class="font-semibold">Audience Numbers (+91...)</label>
+    <textarea id="campNumbers" class="w-full p-3 border rounded-xl mb-4" rows="4" placeholder="+918888888888
++919999999999"></textarea>
+
+    <label class="font-semibold">Schedule</label>
+    <input id="campDate" type="datetime-local" class="w-full p-3 border rounded-xl mb-4" />
+
+    <div class="flex justify-between">
+      <button onclick="closeModal()" class="px-6 py-2 bg-gray-200 rounded-xl">Cancel</button>
+      <button onclick="saveCampaign()" class="px-6 py-2 bg-[var(--green)] text-white rounded-xl">Save Campaign</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// FIREBASE
+firebase.initializeApp({
+  apiKey: "AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain: "tap2send-8e72d.firebaseapp.com",
+  projectId: "tap2send-8e72d",
+  storageBucket: "tap2send-8e72d.firebasestorage.app",
+  messagingSenderId: "572191430506",
+  appId: "1:572191430506:web:3100a351c4be63fbf6b713"
+});
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+let currentUser = null;
+
+// Login Check
+auth.onAuthStateChanged(u=>{
+  if(!u) return window.location="index.html";
+  currentUser = u;
+  loadCampaigns();
+});
+
+// Open Modal
+function openCreate(){ document.getElementById("modal").classList.remove("hidden"); }
+function closeModal(){ document.getElementById("modal").classList.add("hidden"); }
+
+// SAVE CAMPAIGN
+async function saveCampaign(){
+  const name = campName.value.trim();
+  const msg  = campMsg.value.trim();
+  const nums = campNumbers.value.trim().split("\n").map(n=>n.trim());
+  const time = campDate.value;
+
+  if(!name || !msg || nums.length==0 || !time){
+    alert("Fill all fields");
+    return;
+  }
+
+  await db.collection("campaigns").add({
+    uid: currentUser.uid,
+    name,
+    msg,
+    numbers: nums,
+    schedule: new Date(time),
+    status: "scheduled",
+    created: new Date()
+  });
+
+  closeModal();
+  loadCampaigns();
+}
+
+// LOAD CAMPAIGNS
+async function loadCampaigns(){
+  const snap = await db.collection("campaigns")
+    .where("uid","==",currentUser.uid)
+    .orderBy("created","desc")
+    .get();
+
+  const box = document.getElementById("campaignList");
+  box.innerHTML = "";
+
+  snap.forEach(doc=>{
+    const c = doc.data();
+
+    box.innerHTML += `
+      <div class="glass p-5 rounded-2xl shadow-lg hover-scale">
+        <h2 class="text-2xl text-[var(--blue)] font-semibold">${c.name}</h2>
+        <p class="text-gray-600 mt-1">${c.msg}</p>
+        <p class="text-sm mt-2"><b>Numbers:</b> ${c.numbers.length}</p>
+        <p class="text-sm"><b>Schedule:</b> ${new Date(c.schedule.seconds*1000)}</p>
+        <p class="mt-2 font-semibold text-[var(--green)]">Status: ${c.status}</p>
+      </div>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>
