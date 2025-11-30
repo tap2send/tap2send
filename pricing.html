@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tap2Send • Pricing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --green:#0C7A43;
+      --gold:#D4AF37;
+      --blue:#1E3A8A;
+      --white:#ffffff;
+    }
+
+    .hover-scale { transition:.3s; }
+    .hover-scale:hover { transform:scale(1.03); }
+
+    .glass {
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .fade { animation:fade .5s ease-in-out; }
+    @keyframes fade { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-green-50 min-h-screen fade">
+
+<!-- NAVBAR -->
+<div class="bg-white shadow-lg p-4 flex justify-between items-center sticky top-0 z-50">
+  <div class="text-3xl font-bold text-[var(--green)]">Tap2Send</div>
+
+  <div class="hidden md:flex gap-6">
+    <a href="index.html" class="text-gray-700 hover:text-[var(--green)]">Home</a>
+    <a href="pricing.html" class="text-[var(--green)] border-b-2 border-[var(--green)]">Pricing</a>
+    <a href="login.html" class="text-gray-700 hover:text-[var(--green)]">Login</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="max-w-4xl mx-auto text-center mt-12">
+  <h1 class="text-4xl font-bold text-[var(--blue)]">Affordable Plans for Every Marketer</h1>
+  <p class="text-gray-600 mt-3 text-lg">
+    Bulk Messaging • Automation • Templates • Campaigns • Chatbots — All in Tap2Send.
+  </p>
+</div>
+
+<!-- PLANS -->
+<div class="max-w-6xl mx-auto grid md:grid-cols-5 gap-6 mt-12">
+
+  <!-- FREE -->
+  <div class="glass p-6 rounded-2xl shadow-xl hover-scale">
+    <h2 class="text-2xl font-bold text-[var(--blue)]">Free</h2>
+    <div class="text-3xl font-bold mt-3">₹0</div>
+    <ul class="text-sm text-gray-700 mt-4 space-y-2">
+      <li>• Limited Bulk Messages</li>
+      <li>• Basic Templates</li>
+      <li>• Test WhatsApp API</li>
+      <li>• No Automation</li>
+    </ul>
+    <button onclick="goRegister()"
+      class="mt-6 w-full bg-gray-200 py-2 rounded-xl">
+      Get Started
+    </button>
+  </div>
+
+  <!-- 499 -->
+  <div class="glass p-6 rounded-2xl shadow-xl hover-scale">
+    <h2 class="text-2xl font-bold text-[var(--blue)]">Starter</h2>
+    <div class="text-3xl font-bold mt-3">₹499</div>
+    <ul class="text-sm text-gray-700 mt-4 space-y-2">
+      <li>• More Bulk Messages</li>
+      <li>• Unlimited Templates</li>
+      <li>• Basic Automation</li>
+      <li>• Basic Analytics</li>
+    </ul>
+    <button onclick="goRegister()"
+      class="mt-6 w-full bg-[var(--green)] text-white py-2 rounded-xl">
+      Buy Now
+    </button>
+  </div>
+
+  <!-- 999 -->
+  <div class="glass p-6 rounded-2xl shadow-xl shadow-[var(--gold)] border-2 border-[var(--gold)] hover-scale">
+    <h2 class="text-2xl font-bold text-[var(--blue)]">Pro</h2>
+    <div class="text-3xl font-bold mt-3">₹999</div>
+    <ul class="text-sm text-gray-700 mt-4 space-y-2">
+      <li>• Unlimited Messages</li>
+      <li>• Advanced Automation</li>
+      <li>• AI Chatbot Support</li>
+      <li>• Priority Support</li>
+    </ul>
+    <button onclick="goRegister()"
+      class="mt-6 w-full bg-[var(--green)] text-white py-2 rounded-xl">
+      Buy Now
+    </button>
+  </div>
+
+  <!-- 1599 -->
+  <div class="glass p-6 rounded-2xl shadow-xl hover-scale">
+    <h2 class="text-2xl font-bold text-[var(--blue)]">Agency</h2>
+    <div class="text-3xl font-bold mt-3">₹1599</div>
+    <ul class="text-sm text-gray-700 mt-4 space-y-2">
+      <li>• Multi-User Access</li>
+      <li>• Unlimited Clients</li>
+      <li>• AI + Automation</li>
+      <li>• Advanced Analytics</li>
+    </ul>
+    <button onclick="goRegister()"
+      class="mt-6 w-full bg-[var(--green)] text-white py-2 rounded-xl">
+      Buy Now
+    </button>
+  </div>
+
+  <!-- 2399 -->
+  <div class="glass p-6 rounded-2xl shadow-xl hover-scale">
+    <h2 class="text-2xl font-bold text-[var(--blue)]">Enterprise</h2>
+    <div class="text-3xl font-bold mt-3">₹2399</div>
+    <ul class="text-sm text-gray-700 mt-4 space-y-2">
+      <li>• Everything Unlimited</li>
+      <li>• Custom Tools</li>
+      <li>• Full Automation Suite</li>
+      <li>• Dedicated Support</li>
+    </ul>
+    <button onclick="goRegister()"
+      class="mt-6 w-full bg-[var(--green)] text-white py-2 rounded-xl">
+      Buy Now
+    </button>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="text-center text-xs mt-16 mb-10 text-gray-600">
+  © 2025 Tap2Send — All rights reserved.
+</div>
+
+<script>
+function goRegister(){
+  window.location.href = "register.html";
+}
+</script>
+
+</body>
+</html>
