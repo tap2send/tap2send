@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tap2Send • Templates</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<style>
+:root {
+  --green:#0C7A43;
+  --gold:#D4AF37;
+  --blue:#1E3A8A;
+}
+
+.glass {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.btn-main {
+  background: var(--green);
+  color:white;
+  padding:10px 20px;
+  border-radius:12px;
+  transition:.3s;
+}
+.btn-main:hover { transform:scale(1.05); }
+
+.template-card {
+  background:white;
+  border-left:6px solid var(--green);
+  padding:18px;
+  border-radius:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.1);
+  transition:.2s;
+}
+.template-card:hover {
+  transform:translateY(-4px);
+  box-shadow:0 10px 20px rgba(0,0,0,0.15);
+}
+</style>
+</head>
+
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+
+<nav class="bg-[var(--green)] p-5 text-white text-xl font-bold shadow-xl flex justify-between">
+  <span>Tap2Send • Templates</span>
+  <button onclick="logout()" class="bg-white text-[var(--green)] px-4 py-2 rounded-xl">Logout</button>
+</nav>
+
+<div class="max-w-4xl mx-auto p-6">
+
+  <!-- CREATE TEMPLATE FORM -->
+  <div class="glass p-6 rounded-2xl shadow-xl mb-10">
+    <h2 class="text-2xl font-bold text-[var(--blue)] mb-3">Create Template</h2>
+
+    <input id="title" class="w-full border p-3 rounded mb-3" placeholder="Template Title">
+
+    <textarea id="message" class="w-full border p-3 rounded mb-3" rows="5"
+      placeholder="Type your WhatsApp message template..."></textarea>
+
+    <button onclick="saveTemplate()" class="btn-main w-full">Save Template</button>
+    <p id="saveMsg" class="text-green-800 mt-2 font-semibold"></p>
+  </div>
+
+  <!-- TEMPLATE LIST -->
+  <h2 class="text-2xl font-bold text-[var(--green)] mb-4">Your Templates</h2>
+  <div id="templateList"></div>
+
+</div>
+
+<script>
+// FIREBASE INIT
+firebase.initializeApp({
+  apiKey:"AIzaSyDQMbfvjHV-1I3UEHt3asuEBNOO2Qh3RFA",
+  authDomain:"tap2send-8e72d.firebaseapp.com",
+  projectId:"tap2send-8e72d",
+  storageBucket:"tap2send-8e72d.firebasestorage.app",
+  messagingSenderId:"572191430506",
+  appId:"1:572191430506:web:3100a351c4be63fbf6b713"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+let user = null;
+
+// AUTH
+auth.onAuthStateChanged(u => {
+  if(!u) return location.href="login.html";
+  user = u;
+  loadTemplates();
+});
+
+// SAVE TEMPLATE
+async function saveTemplate(){
+  let title = title.value.trim();
+  let msg = message.value.trim();
+
+  if(!title || !msg){
+    alert("Fill all fields");
+    return;
+  }
+
+  await db.collection("users").doc(user.uid).collection("templates").add({
+    title, msg, created: new Date()
+  });
+
+  saveMsg.innerText = "Template Saved!";
+  title.value = "";
+  message.value = "";
+  loadTemplates();
+}
+
+// LOAD TEMPLATES
+async function loadTemplates(){
+  let box = document.getElementById("templateList");
+  box.innerHTML = "<p class='text-gray-600'>Loading...</p>";
+
+  const snap = await db.collection("users").doc(user.uid).collection("templates")
+    .orderBy("created","desc").get();
+
+  if(snap.empty){
+    box.innerHTML = "<p class='text-gray-600'>No templates yet.</p>";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  snap.forEach(doc => {
+    let d = doc.data();
+
+    box.innerHTML += `
+      <div class="template-card mb-4">
+        <h3 class="text-xl font-bold">${d.title}</h3>
+        <p class="mt-2 whitespace-pre-line">${d.msg}</p>
+
+        <button class="mt-3 bg-red-500 text-white px-4 py-2 rounded"
+          onclick="deleteTemplate('${doc.id}')">
+          Delete
+        </button>
+      </div>
+    `;
+  });
+}
+
+// DELETE
+async function deleteTemplate(id){
+  if(!confirm("Delete template?")) return;
+  await db.collection("users").doc(user.uid).collection("templates").doc(id).delete();
+  loadTemplates();
+}
+
+// LOGOUT
+function logout(){ auth.signOut(); }
+</script>
+
+</body>
+</html>
